@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sobre - Promoções Amazon</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        h1 { color: #333; }
+        p { line-height: 1.6; color: #666; }
+        code {
+            background: #f4f4f4;
+            padding: 5px 10px;
+            border-radius: 5px;
+            display: block;
+            margin: 10px 0;
+        }
+        .botao {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📖 Como usar o crawler</h1>
+        
+        <h2>Para atualizar as promoções:</h2>
+        <p>1. Abra o terminal no diretório do projeto</p>
+        <p>2. Execute o comando:</p>
+        <code>python crawler.py</code>
+        
+        <h2>O que acontece:</h2>
+        <ul>
+            <li>O crawler busca produtos de bebê na Amazon</li>
+            <li>Salva no banco de dados (produtos.db)</li>
+            <li>O site mostra automaticamente as novas promoções</li>
+        </ul>
+        
+        <h2>Quantos produtos são salvos?</h2>
+        <p>O crawler salva até 30 produtos por execução, evitando sobrecarga.</p>
+        
+        <a href="/" class="botao">← Voltar para as promoções</a>
+    </div>
+</body>
+</html>
