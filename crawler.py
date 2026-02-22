@@ -19,18 +19,9 @@ HEADERS = {
 # Palavras-chave para busca
 KEYWORDS = ["bebe", "bebê", "fraldas", "mamadeira", "carrinho de bebe", "brinquedos bebe"]
 
-# 🔥 CORREÇÃO: Definir o caminho correto do banco de dados
-if 'RAILWAY_VOLUME_MOUNT_PATH' in os.environ:
-    # Está no Railway - salva no volume persistente
-    DB_PATH = os.path.join(os.environ['RAILWAY_VOLUME_MOUNT_PATH'], 'produtos.db')
-else:
-    # Está localmente - salva na pasta atual
-    DB_PATH = 'produtos.db'
-
+# Sempre salva localmente (no seu PC)
+DB_PATH = 'produtos.db'
 print(f"📁 CRAWLER: Salvando banco em: {DB_PATH}")
-
-# Garantir que o diretório existe
-os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
 
 def extrair_preco_completo(produto):
     """Função para extrair preço com centavos"""
@@ -78,7 +69,7 @@ def buscar_produtos(keyword):
     
     soup = BeautifulSoup(response.content, "html.parser")
     
-    # Seletores atualizados da Amazon
+    # Seletores da Amazon
     produtos = soup.select("[data-component-type='s-search-result']")
     
     if not produtos:
@@ -94,7 +85,7 @@ def buscar_produtos(keyword):
                 continue
             nome = nome_elem.text.strip()
             
-            # PREÇO - usando a nova função
+            # PREÇO
             preco = extrair_preco_completo(produto)
             
             # Imagem
@@ -123,7 +114,7 @@ def buscar_produtos(keyword):
     
     return resultados
 
-# 🔥 CORREÇÃO: Usar DB_PATH na conexão
+# Conecta ao banco de dados LOCAL
 conn = sqlite3.connect(DB_PATH)
 cursor = conn.cursor()
 
@@ -164,4 +155,4 @@ conn.commit()
 conn.close()
 
 print(f"\n✅ {len(todos_produtos[:50])} produtos salvos com sucesso em: {DB_PATH}")
-print(f"📊 Local do banco: {DB_PATH}")
+print(f"📊 Total no banco: {len(todos_produtos[:50])} produtos")

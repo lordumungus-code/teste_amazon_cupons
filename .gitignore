@@ -5,9 +5,10 @@ __pycache__/
 venv/
 env/
 
-# Banco de dados local (comentado porque queremos versionar o banco vazio)
-# *.db
-
 # IDE
 .vscode/
 .idea/
+
+# Banco local (opcional - se quiser ignorar)
+# *.db
+# !produtos.db
