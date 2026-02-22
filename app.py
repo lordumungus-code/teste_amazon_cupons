@@ -8,37 +8,47 @@ app = Flask(__name__)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Função para copiar banco do repositório para o volume
-def copiar_banco_para_volume():
-    if 'RAILWAY_VOLUME_MOUNT_PATH' in os.environ:
-        origem = os.path.join(BASE_DIR, 'produtos.db')
-        destino = os.path.join(os.environ['RAILWAY_VOLUME_MOUNT_PATH'], 'produtos.db')
-        
-        # Se existe banco no repositório e NÃO existe no volume
-        if os.path.exists(origem) and not os.path.exists(destino):
-            shutil.copy2(origem, destino)
-            print(f"📋 Banco copiado do repositório para o volume: {destino}")
-            return destino
-        elif os.path.exists(destino):
-            print(f"✅ Usando banco existente no volume: {destino}")
-            return destino
-    
-    return None
+# Caminhos dos bancos
+BANCO_REPOSITORIO = os.path.join(BASE_DIR, 'produtos.db')
+BANCO_VOLUME = None
 
-# Determina o caminho do banco
 if 'RAILWAY_VOLUME_MOUNT_PATH' in os.environ:
-    # No Railway: usa o volume
-    DB_PATH = os.path.join(os.environ['RAILWAY_VOLUME_MOUNT_PATH'], 'produtos.db')
-    
-    # Se não existe no volume, tenta copiar do repositório
-    if not os.path.exists(DB_PATH):
-        banco_copiado = copiar_banco_para_volume()
-        if not banco_copiado and os.path.exists('produtos.db'):
-            shutil.copy2('produtos.db', DB_PATH)
-            print(f"📋 Banco copiado do repositório para: {DB_PATH}")
+    BANCO_VOLUME = os.path.join(os.environ['RAILWAY_VOLUME_MOUNT_PATH'], 'produtos.db')
+
+# DECISÃO: qual banco usar?
+if BANCO_VOLUME and os.path.exists(BANCO_VOLUME):
+    # Se existe banco no volume, verifica se tem produtos
+    try:
+        conn = sqlite3.connect(BANCO_VOLUME)
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM produtos")
+        count = cursor.fetchone()[0]
+        conn.close()
+        
+        if count > 0:
+            DB_PATH = BANCO_VOLUME
+            print(f"✅ Usando banco do volume com {count} produtos")
+        else:
+            # Volume vazio, tenta copiar do repositório
+            if os.path.exists(BANCO_REPOSITORIO):
+                shutil.copy2(BANCO_REPOSITORIO, BANCO_VOLUME)
+                DB_PATH = BANCO_VOLUME
+                print(f"📋 Banco copiado do repositório para o volume")
+            else:
+                DB_PATH = BANCO_VOLUME
+                print("⚠️ Volume vazio e sem banco no repositório")
+    except:
+        # Erro ao ler, tenta copiar do repositório
+        if os.path.exists(BANCO_REPOSITORIO):
+            shutil.copy2(BANCO_REPOSITORIO, BANCO_VOLUME)
+            DB_PATH = BANCO_VOLUME
+            print(f"📋 Banco copiado do repositório para o volume (após erro)")
+        else:
+            DB_PATH = BANCO_VOLUME
 else:
-    # Local: usa o banco da pasta atual
-    DB_PATH = 'produtos.db'
+    # Não tem volume, usa banco do repositório
+    DB_PATH = BANCO_REPOSITORIO
+    print(f"📁 Usando banco do repositório: {DB_PATH}")
 
 print(f"📁 APP usando banco: {DB_PATH}")
 
@@ -102,35 +112,38 @@ def debug():
             info.append(f"  - {f} ({size} bytes)")
     
     info.append("")
-    info.append("📂 Arquivos no volume (se existir):")
-    if 'RAILWAY_VOLUME_MOUNT_PATH' in os.environ:
-        volume_path = os.environ['RAILWAY_VOLUME_MOUNT_PATH']
-        if os.path.exists(volume_path):
-            for f in os.listdir(volume_path):
-                full_path = os.path.join(volume_path, f)
-                if os.path.isfile(full_path):
-                    size = os.path.getsize(full_path)
-                    info.append(f"  - {f} ({size} bytes)")
-    
-    if os.path.exists(DB_PATH):
-        size = os.path.getsize(DB_PATH)
-        info.append(f"✅ Banco existe! Tamanho: {size} bytes")
+    info.append("📂 BANCO DO REPOSITÓRIO:")
+    if os.path.exists(BANCO_REPOSITORIO):
+        size = os.path.getsize(BANCO_REPOSITORIO)
+        info.append(f"  ✅ Existe: {size} bytes")
         try:
-            conn = sqlite3.connect(DB_PATH)
+            conn = sqlite3.connect(BANCO_REPOSITORIO)
             cursor = conn.cursor()
             cursor.execute("SELECT COUNT(*) FROM produtos")
             count = cursor.fetchone()[0]
-            info.append(f"📊 Produtos: {count}")
-            
-            if count > 0:
-                cursor.execute("SELECT nome, preco FROM produtos LIMIT 2")
-                for nome, preco in cursor.fetchall():
-                    info.append(f"  Ex: {nome[:30]}... R$ {preco}")
+            info.append(f"  📊 Produtos: {count}")
             conn.close()
-        except Exception as e:
-            info.append(f"❌ Erro ao ler banco: {e}")
+        except:
+            info.append("  ❌ Erro ao ler")
     else:
-        info.append("❌ Banco NÃO existe")
+        info.append("  ❌ Não existe")
+    
+    info.append("")
+    info.append("📂 BANCO DO VOLUME:")
+    if BANCO_VOLUME and os.path.exists(BANCO_VOLUME):
+        size = os.path.getsize(BANCO_VOLUME)
+        info.append(f"  ✅ Existe: {size} bytes")
+        try:
+            conn = sqlite3.connect(BANCO_VOLUME)
+            cursor = conn.cursor()
+            cursor.execute("SELECT COUNT(*) FROM produtos")
+            count = cursor.fetchone()[0]
+            info.append(f"  📊 Produtos: {count}")
+            conn.close()
+        except:
+            info.append("  ❌ Erro ao ler")
+    else:
+        info.append("  ❌ Não existe")
     
     return "<br>".join(info)
 
