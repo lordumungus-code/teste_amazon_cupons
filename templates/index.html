@@ -373,11 +373,14 @@
                         </div>
                         
                         <div class="produto-info">
-                            <!-- BADGE DA LOJA -->
-                            {% if produto[4] == "Amazon" %}
+                            <!-- BADGE DA LOJA - CORRIGIDO PARA CASE INSENSITIVE -->
+                            {% set loja = produto[4]|lower %}
+                            {% if loja == "amazon" %}
                                 <span class="loja-badge loja-amazon">🟡 Amazon</span>
-                            {% else %}
+                            {% elif loja == "magalu" %}
                                 <span class="loja-badge loja-magalu">🔵 Magalu</span>
+                            {% else %}
+                                <span class="loja-badge" style="background: #999; color: white;">⚪ {{ produto[4] }}</span>
                             {% endif %}
                             
                             <h3 class="produto-titulo">{{ produto[0] }}</h3>
@@ -397,14 +400,19 @@
                                 {% endif %}
                             </div>
                             
-                            <!-- BOTÃO COM COR DA LOJA -->
-                            {% if produto[4] == "Amazon" %}
+                            <!-- BOTÃO COM COR DA LOJA - CORRIGIDO -->
+                            {% set loja = produto[4]|lower %}
+                            {% if loja == "amazon" %}
                                 <a href="{{ produto[3] }}" target="_blank" class="botao-amazon" rel="noopener noreferrer">
                                     Ver na Amazon 🛒
                                 </a>
-                            {% else %}
+                            {% elif loja == "magalu" %}
                                 <a href="{{ produto[3] }}" target="_blank" class="botao-magalu" rel="noopener noreferrer">
                                     Ver no Magalu 🛒
+                                </a>
+                            {% else %}
+                                <a href="{{ produto[3] }}" target="_blank" class="botao-amazon" style="background: #999;" rel="noopener noreferrer">
+                                    Ver na Loja 🛒
                                 </a>
                             {% endif %}
                         </div>

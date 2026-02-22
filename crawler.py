@@ -2,17 +2,19 @@ import os
 import time
 import sqlite3
 import re
+import random
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
 from webdriver_manager.chrome import ChromeDriverManager
 
 # Tags de afiliado
 PARTNER_TAG_AMAZON = "lordumungus-20"
-PARTNER_TAG_MAGALU = "lordumungus"  # Sua tag do Magalu
+PARTNER_TAG_MAGALU = "lordumungus"
 
 # Palavras-chave para busca
 KEYWORDS = ["bebe", "bebê", "fraldas", "mamadeira", "carrinho de bebe", "brinquedos bebe"]
@@ -164,18 +166,18 @@ def buscar_amazon(driver, keyword):
 
 # ==================== MAGALU ====================
 def extrair_nome_magalu(produto):
-    """Extrai nome do produto no Magalu"""
+    """Extrai nome do produto no Magalu - VERSÃO CORRIGIDA"""
     selectores = [
+        "h2",
         "[data-testid='product-title']",
         "h2.sc-eDvSVe",
         ".sc-khIgEk",
-        "h2",
         ".product-title",
         "a.sc-dLMFU h2",
         "span.sc-kpDqfm",
         "div.sc-fqkvVR",
-        "h2",
-        "span[class*='sc-']"
+        "span[class*='sc-']",
+        "h2[class*='sc-']"
     ]
     
     for seletor in selectores:
@@ -183,23 +185,21 @@ def extrair_nome_magalu(produto):
             elementos = produto.find_elements(By.CSS_SELECTOR, seletor)
             for elem in elementos:
                 nome = elem.text.strip()
-                if nome and len(nome) > 5:
+                if nome and len(nome) > 5 and not nome.startswith("R$"):
                     return nome
         except:
             continue
     return None
 
 def extrair_preco_magalu(produto):
-    """Extrai preço do produto no Magalu"""
+    """Extrai preço do produto no Magalu - VERSÃO CORRIGIDA"""
     selectores_preco = [
         "[data-testid='price-value']",
+        "div.sc-fqkvVR",
+        "span.sc-iGgWBj",
         ".sc-bXCLTC",
         ".sc-bwCtUz",
         ".price-tag",
-        ".andes-money-amount__fraction",
-        "div.sc-fqkvVR",
-        "span.sc-iGgWBj",
-        ".sc-eWnToP",
         "span[class*='price']",
         "div[class*='price']"
     ]
@@ -209,7 +209,7 @@ def extrair_preco_magalu(produto):
             elementos = produto.find_elements(By.CSS_SELECTOR, seletor)
             for elem in elementos:
                 preco_texto = elem.text.strip()
-                if preco_texto:
+                if preco_texto and "R$" in preco_texto:
                     # Remove R$ e pontos, mantém vírgula
                     preco_texto = preco_texto.replace('R$', '').replace('.', '').strip()
                     match = re.search(r'[\d,]+', preco_texto)
@@ -221,11 +221,11 @@ def extrair_preco_magalu(produto):
     return "Preço indisponível"
 
 def extrair_imagem_magalu(produto):
-    """Extrai URL da imagem no Magalu"""
+    """Extrai URL da imagem no Magalu - VERSÃO CORRIGIDA"""
     selectores_img = [
-        "img.sc-fqkvVR",
+        "img",
         "img[data-testid='image']",
-        "img"
+        "img.sc-fqkvVR"
     ]
     
     for seletor in selectores_img:
@@ -233,7 +233,7 @@ def extrair_imagem_magalu(produto):
             imagens = produto.find_elements(By.CSS_SELECTOR, seletor)
             for img in imagens:
                 src = img.get_attribute("src")
-                if src and src.startswith("http"):
+                if src and src.startswith("http") and not src.endswith("svg"):
                     # Tenta pegar imagem maior
                     src = src.replace("50x50", "200x200").replace("100x100", "200x200")
                     return src
@@ -243,11 +243,11 @@ def extrair_imagem_magalu(produto):
     return "https://via.placeholder.com/200x200?text=Magalu"
 
 def extrair_link_magalu(produto):
-    """Extrai link do produto no Magalu e adiciona tag de afiliado"""
+    """Extrai link do produto no Magalu - VERSÃO CORRIGIDA"""
     selectores_link = [
-        "a.sc-dLMFU",
+        "a",
         "a[data-testid='product-card-link']",
-        "a"
+        "a.sc-dLMFU"
     ]
     
     for seletor in selectores_link:
@@ -255,7 +255,7 @@ def extrair_link_magalu(produto):
             links = produto.find_elements(By.CSS_SELECTOR, seletor)
             for link_elem in links:
                 link = link_elem.get_attribute("href")
-                if link and "magazineluiza.com.br" in link:
+                if link and "magazineluiza.com.br" in link and "/produto/" in link:
                     # Limpa o link e adiciona a tag de afiliado
                     if '?' in link:
                         link = link.split('?')[0]
@@ -266,68 +266,75 @@ def extrair_link_magalu(produto):
     return None
 
 def buscar_magalu(driver, keyword):
-    """Busca produtos no Magalu"""
+    """Busca produtos no Magalu - VERSÃO CORRIGIDA"""
     print(f"\n🔵 MAGALU - Buscando: {keyword}")
+    
+    # Comportamento humano: delay aleatório
+    time.sleep(random.uniform(2, 4))
+    
     url = f"https://www.magazineluiza.com.br/busca/{keyword}/"
+    print(f"  URL: {url}")
     driver.get(url)
     
     # Aguarda carregar
-    time.sleep(4)
+    time.sleep(5)
     
-    # Rola a página para carregar mais produtos
-    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-    time.sleep(2)
-    
-    # Tenta diferentes seletores para encontrar produtos
-    todos_produtos = []
-    
-    # Seletor 1: data-testid
+    # Tenta fechar qualquer modal/popup
     try:
-        produtos = driver.find_elements(By.CSS_SELECTOR, "[data-testid='product-list'] > div")
-        todos_produtos.extend(produtos)
+        body = driver.find_element(By.TAG_NAME, "body")
+        body.click()
     except:
         pass
     
-    # Seletor 2: sc-eDvSVe
+    # Rola a página suavemente
+    for i in range(3):
+        driver.execute_script(f"window.scrollTo(0, {i * 400});")
+        time.sleep(random.uniform(1, 2))
+    
+    # Encontra os produtos
+    produtos = []
+    
+    # Seletor principal do Magalu
     try:
-        produtos = driver.find_elements(By.CSS_SELECTOR, ".sc-eDvSVe")
-        todos_produtos.extend(produtos)
+        produtos = driver.find_elements(By.CSS_SELECTOR, "[data-testid='product-card']")
+        if produtos:
+            print(f"  📦 Encontrados {len(produtos)} produtos (seletor 1)")
     except:
         pass
     
-    # Seletor 3: li[data-testid]
-    try:
-        produtos = driver.find_elements(By.CSS_SELECTOR, "li[data-testid='product-card']")
-        todos_produtos.extend(produtos)
-    except:
-        pass
+    if not produtos:
+        try:
+            produtos = driver.find_elements(By.CSS_SELECTOR, "li[data-testid='product-card']")
+            if produtos:
+                print(f"  📦 Encontrados {len(produtos)} produtos (seletor 2)")
+        except:
+            pass
     
-    # Seletor 4: div[class*="sc-"]
-    try:
-        produtos = driver.find_elements(By.CSS_SELECTOR, "div[class*='sc-']")
-        for p in produtos[:20]:
-            if p.text and len(p.text) > 20:
-                todos_produtos.append(p)
-    except:
-        pass
+    if not produtos:
+        try:
+            produtos = driver.find_elements(By.CSS_SELECTOR, "div[class*='sc-']")
+            produtos = [p for p in produtos if p.text and len(p.text) > 50][:30]
+            if produtos:
+                print(f"  📦 Encontrados {len(produtos)} produtos (seletor 3)")
+        except:
+            pass
     
-    # Remove duplicatas mantendo a ordem
-    produtos_unicos = []
-    seen = set()
-    for p in todos_produtos:
-        if p not in seen:
-            seen.add(p)
-            produtos_unicos.append(p)
+    if not produtos:
+        print("  ❌ Nenhum produto encontrado no Magalu")
+        return []
     
-    print(f"  📦 Encontrados {len(produtos_unicos)} produtos no Magalu")
+    print(f"  📦 Total: {len(produtos)} produtos encontrados")
     
     resultados = []
     contador = 0
     
-    for produto in produtos_unicos[:15]:
+    for i, produto in enumerate(produtos[:15]):
         try:
+            print(f"  🔄 Processando produto {i+1}...")
+            
             nome = extrair_nome_magalu(produto)
             if not nome:
+                print(f"    ⚠ Sem nome, pulando")
                 continue
             
             preco = extrair_preco_magalu(produto)
@@ -335,6 +342,7 @@ def buscar_magalu(driver, keyword):
             link = extrair_link_magalu(produto)
             
             if not link:
+                print(f"    ⚠ Sem link, pulando")
                 continue
             
             resultados.append((nome, preco, imagem, link, "Magalu"))
@@ -342,19 +350,25 @@ def buscar_magalu(driver, keyword):
             print(f"  ✓ Magalu {contador:2d}: {nome[:40]}... - R$ {preco}")
             
         except Exception as e:
+            print(f"    ⚠ Erro: {e}")
             continue
         
         time.sleep(0.5)
     
+    print(f"  → Extraídos {contador} produtos do Magalu")
     return resultados
 
 # ==================== ATUALIZAR BANCO ====================
 def atualizar_banco(resultados):
     """Salva os resultados no banco de dados"""
+    if not resultados:
+        print("❌ Nenhum resultado para salvar!")
+        return
+    
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     
-    # Cria a tabela se não existir
+    # Cria a tabela se não existir (agora com campo loja)
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS produtos (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -366,12 +380,15 @@ def atualizar_banco(resultados):
     )
     """)
     
-    # Limpa produtos antigos
+    # Conta antes de limpar
+    cursor.execute("SELECT COUNT(*) FROM produtos")
+    antes = cursor.fetchone()[0]
+    
+    # Limpa produtos antigos (opcional - comentar se quiser acumular)
     cursor.execute("DELETE FROM produtos")
-    print("🗑️ Banco antigo limpo")
     
     # Insere os novos produtos
-    for i, produto in enumerate(resultados[:48], 1):
+    for i, produto in enumerate(resultados, 1):
         cursor.execute("""
         INSERT INTO produtos (nome, preco, imagem, link, loja)
         VALUES (?, ?, ?, ?, ?)
@@ -389,41 +406,17 @@ def atualizar_banco(resultados):
     conn.close()
     
     print(f"\n✅ {count} produtos salvos com sucesso!")
+    print(f"   (Antes: {antes} produtos)")
     for loja, qtd in stats:
         print(f"   • {loja}: {qtd} produtos")
 
-# ==================== DEBUG MAGALU ====================
-def debug_magalu(driver, keyword):
-    """Versão de debug para testar o Magalu"""
-    print(f"\n🔵 MAGALU (DEBUG) - Buscando: {keyword}")
-    print(f"  URL: https://www.magazineluiza.com.br/busca/{keyword}/")
-    
-    driver.get(f"https://www.magazineluiza.com.br/busca/{keyword}/")
-    time.sleep(5)
-    
-    # Salva screenshot
-    screenshot = f"magalu_debug_{keyword}.png"
-    driver.save_screenshot(screenshot)
-    print(f"  📸 Screenshot salvo: {screenshot}")
-    
-    # Mostra título da página
-    print(f"  📄 Título da página: {driver.title}")
-    
-    # Lista todos os elementos com classe começando com sc-
-    print("\n  🔍 Elementos com classe 'sc-':")
-    elementos_sc = driver.find_elements(By.CSS_SELECTOR, "[class*='sc-']")
-    for i, elem in enumerate(elementos_sc[:10]):
-        print(f"    {i+1}. Classe: {elem.get_attribute('class')}")
-        print(f"       Texto: {elem.text[:50]}")
-    
-    # Busca produtos
-    return buscar_magalu(driver, keyword)
-
 # ==================== MAIN ====================
 def main():
-    print("🚀 Iniciando crawler multi-lojas (Amazon + Magalu)")
-    print(f"🎯 Tags: Amazon={PARTNER_TAG_AMAZON}, Magalu={PARTNER_TAG_MAGALU}")
     print("=" * 60)
+    print("🚀 CRAWLER MULTI-LOJAS (AMAZON + MAGALU)")
+    print("=" * 60)
+    print(f"🎯 Tags: Amazon={PARTNER_TAG_AMAZON}, Magalu={PARTNER_TAG_MAGALU}")
+    print()
     
     driver = configurar_driver()
     todos_produtos = []
@@ -431,9 +424,6 @@ def main():
     total_magalu = 0
     
     try:
-        # Escolha qual modo usar:
-        MODO_DEBUG = True  # Mude para False para executar normalmente
-        
         for keyword in KEYWORDS:
             print(f"\n{'='*60}")
             print(f"🔎 PALAVRA-CHAVE: {keyword.upper()}")
@@ -444,18 +434,10 @@ def main():
             todos_produtos.extend(produtos_amazon)
             total_amazon += len(produtos_amazon)
             
-            time.sleep(2)
+            time.sleep(random.uniform(2, 4))
             
-            # Busca no Magalu (modo normal ou debug)
-            if MODO_DEBUG:
-                # Primeira keyword em modo debug
-                if keyword == KEYWORDS[0]:
-                    produtos_magalu = debug_magalu(driver, keyword)
-                else:
-                    produtos_magalu = buscar_magalu(driver, keyword)
-            else:
-                produtos_magalu = buscar_magalu(driver, keyword)
-            
+            # Busca no Magalu
+            produtos_magalu = buscar_magalu(driver, keyword)
             todos_produtos.extend(produtos_magalu)
             total_magalu += len(produtos_magalu)
             
@@ -465,7 +447,7 @@ def main():
                 print("\n🛑 Atingido limite de 48 produtos")
                 break
             
-            time.sleep(3)
+            time.sleep(random.uniform(3, 5))
         
         print(f"\n{'='*60}")
         print(f"📊 RESUMO FINAL")
