@@ -1,158 +1,171 @@
 import os
-import requests
-from bs4 import BeautifulSoup
-import sqlite3
 import time
+import sqlite3
 import re
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from webdriver_manager.chrome import ChromeDriverManager
 
 PARTNER_TAG = "lordumungus-20"
-
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
-    "Accept-Encoding": "gzip, deflate, br",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-    "Connection": "keep-alive",
-    "Upgrade-Insecure-Requests": "1",
-}
 
 # Palavras-chave para busca
 KEYWORDS = ["bebe", "bebê", "fraldas", "mamadeira", "carrinho de bebe", "brinquedos bebe"]
 
-# Sempre salva localmente (no seu PC)
+# Banco local
 DB_PATH = 'produtos.db'
 print(f"📁 CRAWLER: Salvando banco em: {DB_PATH}")
 
+def configurar_driver():
+    """Configura o Chrome em modo stealth"""
+    options = Options()
+    options.add_argument("--window-size=1920,1080")
+    options.add_argument("--disable-blink-features=AutomationControlled")
+    options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+    options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    options.add_experimental_option('useAutomationExtension', False)
+    
+    # Executa em segundo plano (mais rápido)
+    options.add_argument("--headless=new")
+    
+    driver = webdriver.Chrome(
+        service=Service(ChromeDriverManager().install()),
+        options=options
+    )
+    
+    # Remove a flag de automação
+    driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+    
+    return driver
+
 def extrair_preco_completo(produto):
-    """Função para extrair preço com centavos"""
-    
-    # Tenta encontrar o preço inteiro + centavos
-    preco_inteiro = produto.select_one(".a-price-whole")
-    preco_centavos = produto.select_one(".a-price-fraction")
-    
-    if preco_inteiro and preco_centavos:
-        # Limpa o texto (remove pontos e caracteres especiais)
-        inteiro = re.sub(r'[^\d]', '', preco_inteiro.text)
-        centavos = re.sub(r'[^\d]', '', preco_centavos.text)
+    """Extrai preço dos elementos"""
+    try:
+        # Tenta o preço inteiro
+        preco_inteiro = produto.find_element(By.CSS_SELECTOR, ".a-price-whole").text
+        preco_centavos = produto.find_element(By.CSS_SELECTOR, ".a-price-fraction").text
         
-        # Formata o preço completo
+        inteiro = re.sub(r'[^\d]', '', preco_inteiro)
+        centavos = re.sub(r'[^\d]', '', preco_centavos)
+        
         if inteiro and centavos:
             return f"{inteiro},{centavos}"
+    except:
+        pass
     
-    # Tenta o seletor de preço completo
-    preco_completo = produto.select_one(".a-price .a-offscreen")
-    if preco_completo:
-        preco_texto = preco_completo.text.strip()
-        # Extrai apenas números e vírgula/ponto
-        match = re.search(r'[\d.,]+', preco_texto)
+    try:
+        preco_completo = produto.find_element(By.CSS_SELECTOR, ".a-price .a-offscreen").text
+        match = re.search(r'[\d.,]+', preco_completo)
         if match:
             return match.group().replace('.', ',')
-    
-    # Tenta outros formatos de preço
-    preco_span = produto.select_one("span.a-price[data-a-size='xl'] span.a-offscreen")
-    if preco_span:
-        return preco_span.text.strip().replace('R$', '').strip()
+    except:
+        pass
     
     return "Preço indisponível"
 
-def buscar_produtos(keyword):
+def buscar_produtos(driver, keyword):
     print(f"\n🔍 Buscando produtos para: {keyword}")
     
-    URL = f"https://www.amazon.com.br/s?k={keyword}"
+    url = f"https://www.amazon.com.br/s?k={keyword}"
+    driver.get(url)
     
-    try:
-        response = requests.get(URL, headers=HEADERS, timeout=15)
-        response.raise_for_status()
-    except requests.RequestException as e:
-        print(f"❌ Erro na requisição: {e}")
-        return []
+    # Aguarda carregar
+    time.sleep(3)
     
-    soup = BeautifulSoup(response.content, "html.parser")
+    # Rola a página para carregar tudo
+    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+    time.sleep(2)
     
-    # Seletores da Amazon
-    produtos = soup.select("[data-component-type='s-search-result']")
+    produtos = driver.find_elements(By.CSS_SELECTOR, "[data-component-type='s-search-result']")
     
     if not produtos:
-        produtos = soup.select(".s-result-item")
+        produtos = driver.find_elements(By.CSS_SELECTOR, ".s-result-item")
+    
+    print(f"  📦 Encontrados {len(produtos)} produtos")
     
     resultados = []
     
     for produto in produtos[:20]:
         try:
-            # Nome do produto
-            nome_elem = produto.select_one("h2 a span") or produto.select_one("h2")
-            if not nome_elem:
-                continue
+            # Nome
+            nome_elem = produto.find_element(By.CSS_SELECTOR, "h2 a span")
             nome = nome_elem.text.strip()
             
-            # PREÇO
+            # Preço
             preco = extrair_preco_completo(produto)
             
             # Imagem
-            img_elem = produto.select_one("img.s-image")
-            if img_elem and img_elem.get("src"):
-                imagem = img_elem["src"]
-            else:
+            try:
+                img_elem = produto.find_element(By.CSS_SELECTOR, "img.s-image")
+                imagem = img_elem.get_attribute("src")
+            except:
                 imagem = ""
             
             # Link
-            link_elem = produto.select_one("h2 a") or produto.select_one("a.a-link-normal")
-            if link_elem and link_elem.get("href"):
-                link = "https://www.amazon.com.br" + link_elem["href"].split('?')[0]
+            try:
+                link_elem = produto.find_element(By.CSS_SELECTOR, "h2 a")
+                link = link_elem.get_attribute("href").split('?')[0]
                 link += f"?tag={PARTNER_TAG}"
-            else:
+            except:
                 continue
             
             resultados.append((nome, preco, imagem, link))
             print(f"  ✓ {nome[:50]}... - R$ {preco}")
             
         except Exception as e:
-            print(f"  ⚠ Erro ao processar produto: {e}")
             continue
         
-        time.sleep(0.5)
+        time.sleep(1)
     
     return resultados
 
-# Conecta ao banco de dados LOCAL
-conn = sqlite3.connect(DB_PATH)
-cursor = conn.cursor()
+# Instalar dependências necessárias:
+# pip install selenium webdriver-manager
 
-# Cria a tabela se não existir
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS produtos (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    nome TEXT,
-    preco TEXT,
-    imagem TEXT,
-    link TEXT
-)
-""")
-
-# Limpa produtos antigos
-cursor.execute("DELETE FROM produtos")
+# Configurar driver
+driver = configurar_driver()
 
 todos_produtos = []
 
-# Busca produtos para cada palavra-chave
-for keyword in KEYWORDS:
-    produtos = buscar_produtos(keyword)
-    todos_produtos.extend(produtos)
+try:
+    for keyword in KEYWORDS:
+        produtos = buscar_produtos(driver, keyword)
+        todos_produtos.extend(produtos)
+        
+        if len(todos_produtos) >= 50:
+            break
+        
+        time.sleep(3)
     
-    if len(todos_produtos) >= 50:
-        break
+    # Salvar no banco
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
     
-    time.sleep(2)
-
-# Insere os produtos no banco de dados
-for produto in todos_produtos[:50]:
     cursor.execute("""
-    INSERT INTO produtos (nome, preco, imagem, link)
-    VALUES (?, ?, ?, ?)
-    """, produto)
+    CREATE TABLE IF NOT EXISTS produtos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nome TEXT,
+        preco TEXT,
+        imagem TEXT,
+        link TEXT
+    )
+    """)
+    
+    cursor.execute("DELETE FROM produtos")
+    
+    for produto in todos_produtos[:50]:
+        cursor.execute("""
+        INSERT INTO produtos (nome, preco, imagem, link)
+        VALUES (?, ?, ?, ?)
+        """, produto)
+    
+    conn.commit()
+    conn.close()
+    
+    print(f"\n✅ {len(todos_produtos[:50])} produtos salvos!")
 
-conn.commit()
-conn.close()
-
-print(f"\n✅ {len(todos_produtos[:50])} produtos salvos com sucesso em: {DB_PATH}")
-print(f"📊 Total no banco: {len(todos_produtos[:50])} produtos")
+finally:
+    driver.quit()
