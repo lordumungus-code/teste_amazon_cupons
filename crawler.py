@@ -12,10 +12,8 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 PARTNER_TAG = "lordumungus-20"
 
-# Palavras-chave para busca
 KEYWORDS = ["bebe", "bebê", "fraldas", "mamadeira", "carrinho de bebe", "brinquedos bebe"]
 
-# Banco local
 DB_PATH = 'produtos.db'
 print(f"📁 CRAWLER: Salvando banco em: {DB_PATH}")
 
@@ -28,42 +26,32 @@ def configurar_driver():
     options.add_experimental_option("excludeSwitches", ["enable-automation"])
     options.add_experimental_option('useAutomationExtension', False)
     
-    # Executa em segundo plano (mais rápido)
-    options.add_argument("--headless=new")
+    # Descomente a linha abaixo se quiser ver o navegador (para testes)
+    # options.add_argument("--headless=new")
     
     driver = webdriver.Chrome(
         service=Service(ChromeDriverManager().install()),
         options=options
     )
     
-    # Remove a flag de automação
     driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
-    
     return driver
 
-def extrair_preco_completo(produto):
-    """Extrai preço dos elementos"""
+def extrair_preco(produto):
     try:
-        # Tenta o preço inteiro
         preco_inteiro = produto.find_element(By.CSS_SELECTOR, ".a-price-whole").text
         preco_centavos = produto.find_element(By.CSS_SELECTOR, ".a-price-fraction").text
-        
         inteiro = re.sub(r'[^\d]', '', preco_inteiro)
         centavos = re.sub(r'[^\d]', '', preco_centavos)
-        
-        if inteiro and centavos:
-            return f"{inteiro},{centavos}"
+        return f"{inteiro},{centavos}"
     except:
-        pass
-    
-    try:
-        preco_completo = produto.find_element(By.CSS_SELECTOR, ".a-price .a-offscreen").text
-        match = re.search(r'[\d.,]+', preco_completo)
-        if match:
-            return match.group().replace('.', ',')
-    except:
-        pass
-    
+        try:
+            preco_completo = produto.find_element(By.CSS_SELECTOR, ".a-price .a-offscreen").text
+            match = re.search(r'[\d.,]+', preco_completo)
+            if match:
+                return match.group().replace('.', ',')
+        except:
+            pass
     return "Preço indisponível"
 
 def buscar_produtos(driver, keyword):
@@ -72,10 +60,7 @@ def buscar_produtos(driver, keyword):
     url = f"https://www.amazon.com.br/s?k={keyword}"
     driver.get(url)
     
-    # Aguarda carregar
     time.sleep(3)
-    
-    # Rola a página para carregar tudo
     driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
     time.sleep(2)
     
@@ -90,21 +75,17 @@ def buscar_produtos(driver, keyword):
     
     for produto in produtos[:20]:
         try:
-            # Nome
             nome_elem = produto.find_element(By.CSS_SELECTOR, "h2 a span")
             nome = nome_elem.text.strip()
             
-            # Preço
-            preco = extrair_preco_completo(produto)
+            preco = extrair_preco(produto)
             
-            # Imagem
             try:
                 img_elem = produto.find_element(By.CSS_SELECTOR, "img.s-image")
                 imagem = img_elem.get_attribute("src")
             except:
                 imagem = ""
             
-            # Link
             try:
                 link_elem = produto.find_element(By.CSS_SELECTOR, "h2 a")
                 link = link_elem.get_attribute("href").split('?')[0]
@@ -122,12 +103,8 @@ def buscar_produtos(driver, keyword):
     
     return resultados
 
-# Instalar dependências necessárias:
-# pip install selenium webdriver-manager
-
-# Configurar driver
+print("🚀 Iniciando crawler com Selenium...")
 driver = configurar_driver()
-
 todos_produtos = []
 
 try:
