@@ -1,3 +1,4 @@
+import os
 import requests
 from bs4 import BeautifulSoup
 import sqlite3
@@ -17,6 +18,19 @@ HEADERS = {
 
 # Palavras-chave para busca
 KEYWORDS = ["bebe", "bebê", "fraldas", "mamadeira", "carrinho de bebe", "brinquedos bebe"]
+
+# 🔥 CORREÇÃO: Definir o caminho correto do banco de dados
+if 'RAILWAY_VOLUME_MOUNT_PATH' in os.environ:
+    # Está no Railway - salva no volume persistente
+    DB_PATH = os.path.join(os.environ['RAILWAY_VOLUME_MOUNT_PATH'], 'produtos.db')
+else:
+    # Está localmente - salva na pasta atual
+    DB_PATH = 'produtos.db'
+
+print(f"📁 CRAWLER: Salvando banco em: {DB_PATH}")
+
+# Garantir que o diretório existe
+os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
 
 def extrair_preco_completo(produto):
     """Função para extrair preço com centavos"""
@@ -109,8 +123,8 @@ def buscar_produtos(keyword):
     
     return resultados
 
-# Conecta ao banco de dados
-conn = sqlite3.connect("produtos.db")
+# 🔥 CORREÇÃO: Usar DB_PATH na conexão
+conn = sqlite3.connect(DB_PATH)
 cursor = conn.cursor()
 
 # Cria a tabela se não existir
@@ -149,4 +163,5 @@ for produto in todos_produtos[:50]:
 conn.commit()
 conn.close()
 
-print(f"\n✅ {len(todos_produtos[:30])} produtos salvos com sucesso!")
+print(f"\n✅ {len(todos_produtos[:50])} produtos salvos com sucesso em: {DB_PATH}")
+print(f"📊 Local do banco: {DB_PATH}")
