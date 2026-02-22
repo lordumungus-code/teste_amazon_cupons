@@ -15,42 +15,47 @@ BANCO_VOLUME = None
 if 'RAILWAY_VOLUME_MOUNT_PATH' in os.environ:
     BANCO_VOLUME = os.path.join(os.environ['RAILWAY_VOLUME_MOUNT_PATH'], 'produtos.db')
 
-# DECISÃO: qual banco usar?
-if BANCO_VOLUME and os.path.exists(BANCO_VOLUME):
-    # Se existe banco no volume, verifica se tem produtos
+def contar_produtos(caminho):
+    """Conta quantos produtos tem em um banco"""
     try:
-        conn = sqlite3.connect(BANCO_VOLUME)
+        conn = sqlite3.connect(caminho)
         cursor = conn.cursor()
         cursor.execute("SELECT COUNT(*) FROM produtos")
         count = cursor.fetchone()[0]
         conn.close()
-        
-        if count > 0:
-            DB_PATH = BANCO_VOLUME
-            print(f"✅ Usando banco do volume com {count} produtos")
-        else:
-            # Volume vazio, tenta copiar do repositório
-            if os.path.exists(BANCO_REPOSITORIO):
-                shutil.copy2(BANCO_REPOSITORIO, BANCO_VOLUME)
-                DB_PATH = BANCO_VOLUME
-                print(f"📋 Banco copiado do repositório para o volume")
-            else:
-                DB_PATH = BANCO_VOLUME
-                print("⚠️ Volume vazio e sem banco no repositório")
+        return count
     except:
-        # Erro ao ler, tenta copiar do repositório
-        if os.path.exists(BANCO_REPOSITORIO):
+        return 0
+
+# DECISÃO: qual banco usar?
+if BANCO_VOLUME and os.path.exists(BANCO_VOLUME):
+    # Tem banco no volume
+    count_volume = contar_produtos(BANCO_VOLUME)
+    
+    if os.path.exists(BANCO_REPOSITORIO):
+        # Tem banco nos dois lugares
+        count_repositorio = contar_produtos(BANCO_REPOSITORIO)
+        
+        print(f"📊 Comparação: Volume={count_volume} produtos, Repositório={count_repositorio} produtos")
+        
+        if count_repositorio > count_volume:
+            # Repositório tem mais produtos! Copia para o volume
+            print(f"📋 Repositório tem mais produtos. Copiando para o volume...")
             shutil.copy2(BANCO_REPOSITORIO, BANCO_VOLUME)
             DB_PATH = BANCO_VOLUME
-            print(f"📋 Banco copiado do repositório para o volume (após erro)")
         else:
+            # Volume já tem o banco mais atualizado
             DB_PATH = BANCO_VOLUME
+    else:
+        # Só tem banco no volume
+        DB_PATH = BANCO_VOLUME
 else:
     # Não tem volume, usa banco do repositório
     DB_PATH = BANCO_REPOSITORIO
-    print(f"📁 Usando banco do repositório: {DB_PATH}")
 
-print(f"📁 APP usando banco: {DB_PATH}")
+# Verificação final
+count_final = contar_produtos(DB_PATH)
+print(f"✅ Usando banco: {DB_PATH} com {count_final} produtos")
 
 PRODUTOS_POR_PAGINA = 12
 
@@ -115,16 +120,8 @@ def debug():
     info.append("📂 BANCO DO REPOSITÓRIO:")
     if os.path.exists(BANCO_REPOSITORIO):
         size = os.path.getsize(BANCO_REPOSITORIO)
-        info.append(f"  ✅ Existe: {size} bytes")
-        try:
-            conn = sqlite3.connect(BANCO_REPOSITORIO)
-            cursor = conn.cursor()
-            cursor.execute("SELECT COUNT(*) FROM produtos")
-            count = cursor.fetchone()[0]
-            info.append(f"  📊 Produtos: {count}")
-            conn.close()
-        except:
-            info.append("  ❌ Erro ao ler")
+        count = contar_produtos(BANCO_REPOSITORIO)
+        info.append(f"  ✅ Existe: {size} bytes, {count} produtos")
     else:
         info.append("  ❌ Não existe")
     
@@ -132,18 +129,13 @@ def debug():
     info.append("📂 BANCO DO VOLUME:")
     if BANCO_VOLUME and os.path.exists(BANCO_VOLUME):
         size = os.path.getsize(BANCO_VOLUME)
-        info.append(f"  ✅ Existe: {size} bytes")
-        try:
-            conn = sqlite3.connect(BANCO_VOLUME)
-            cursor = conn.cursor()
-            cursor.execute("SELECT COUNT(*) FROM produtos")
-            count = cursor.fetchone()[0]
-            info.append(f"  📊 Produtos: {count}")
-            conn.close()
-        except:
-            info.append("  ❌ Erro ao ler")
+        count = contar_produtos(BANCO_VOLUME)
+        info.append(f"  ✅ Existe: {size} bytes, {count} produtos")
     else:
         info.append("  ❌ Não existe")
+    
+    info.append("")
+    info.append(f"✅ BANCO EM USO: {DB_PATH}")
     
     return "<br>".join(info)
 
