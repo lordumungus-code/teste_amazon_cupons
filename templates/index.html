@@ -3,458 +3,320 @@
 <head>
     <title>Promoções Amazon e Magalu para Bebês</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #eef2ff 0%, #f8fafc 100%);
             min-height: 100vh;
-            padding: 10px;
+            padding: 12px;
         }
-        
+
         .container {
             max-width: 1300px;
             margin: 0 auto;
         }
-        
-        /* HEADER RESPONSIVO */
+
+        /* HEADER */
         header {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            padding: 25px;
+            border-radius: 18px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
         }
-        
+
         h1 {
-            color: #333;
-            font-size: 1.8em;
+            color: #111827;
+            font-size: 1.9em;
             margin-bottom: 8px;
-            line-height: 1.2;
         }
-        
+
         .subtitle {
-            color: #666;
+            color: #6b7280;
             font-size: 0.95em;
         }
-        
+
         .stats {
-            background: #f8f9fa;
+            background: #f3f4f6;
             padding: 12px;
-            border-radius: 10px;
-            margin-top: 12px;
+            border-radius: 12px;
+            margin-top: 15px;
             display: flex;
             justify-content: space-between;
-            align-items: center;
             flex-wrap: wrap;
             gap: 10px;
         }
-        
-        .stats span:first-child {
-            font-size: 0.9em;
-        }
-        
+
         .total-produtos {
-            background: #667eea;
+            background: #4f46e5;
             color: white;
-            padding: 5px 12px;
+            padding: 6px 14px;
             border-radius: 20px;
             font-weight: bold;
             font-size: 0.85em;
-            white-space: nowrap;
         }
-        
-        /* GRADE DE PRODUTOS RESPONSIVA */
+
+        /* GRID */
         .produtos-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 15px;
-            margin-bottom: 25px;
+            gap: 20px;
         }
-        
-        /* CELULAR: 1 coluna */
+
         @media (max-width: 600px) {
             .produtos-grid {
                 grid-template-columns: 1fr;
-                gap: 12px;
             }
-            
-            body {
-                padding: 8px;
-            }
-            
-            header {
-                padding: 15px;
-            }
-            
+
             h1 {
-                font-size: 1.5em;
+                font-size: 1.6em;
             }
         }
-        
-        /* TABLET: 2 colunas */
-        @media (min-width: 601px) and (max-width: 900px) {
-            .produtos-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        
+
+        /* CARD */
         .produto {
             background: white;
-            border-radius: 12px;
+            border-radius: 18px;
             overflow: hidden;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-            transition: transform 0.2s, box-shadow 0.2s;
             display: flex;
             flex-direction: column;
-            height: 100%;
+            transition: all 0.25s ease;
+            border: 1px solid rgba(0,0,0,0.04);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
         }
-        
-        .produto:active {
-            transform: scale(0.98);
+
+        .produto:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.12);
         }
-        
+
         .produto-imagem {
-            height: 180px;
-            padding: 10px;
+            height: 200px;
+            padding: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #f8f9fa;
+            background: #f9fafb;
         }
-        
+
         .produto-imagem img {
             max-width: 100%;
-            max-height: 160px;
+            max-height: 170px;
             object-fit: contain;
         }
-        
+
         .produto-info {
-            padding: 15px;
-            flex-grow: 1;
+            padding: 18px;
             display: flex;
             flex-direction: column;
+            flex-grow: 1;
         }
-        
-        /* BADGE DA LOJA */
+
+        /* BADGES */
         .loja-badge {
             display: inline-block;
-            padding: 4px 10px;
-            border-radius: 20px;
+            padding: 5px 12px;
+            border-radius: 25px;
             font-size: 0.75em;
             font-weight: bold;
-            margin-bottom: 8px;
-            width: fit-content;
+            margin-bottom: 10px;
         }
-        
+
         .loja-amazon {
-            background: #FFD814;
-            color: #000;
-            border: 1px solid #FCD200;
+            background: #facc15;
+            color: #111;
         }
-        
+
         .loja-magalu {
-            background: #00A1FC;
+            background: #2563eb;
             color: white;
         }
-        
+
+        /* TÍTULO */
         .produto-titulo {
             font-size: 1em;
-            margin-bottom: 8px;
-            color: #333;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            min-height: 2.8em;
+            margin-bottom: 10px;
+            color: #1f2937;
             line-height: 1.4;
+            min-height: 3em;
+            overflow: hidden;
         }
-        
+
+        /* PREÇO */
         .produto-preco {
-            font-size: 1.6em;
+            font-size: 1.7em;
             font-weight: bold;
-            color: #2ecc71;
+            color: #16a34a;
             margin: 8px 0;
-            line-height: 1.2;
         }
-        
-        /* CELULAR: preço um pouco menor */
-        @media (max-width: 480px) {
-            .produto-preco {
-                font-size: 1.4em;
-            }
-        }
-        
+
         .preco-indisponivel {
-            color: #999;
+            color: #9ca3af;
             font-size: 1em;
-            font-weight: normal;
         }
-        
+
         .produto-preco small {
             font-size: 0.55em;
-            color: #666;
-            font-weight: normal;
+            color: #6b7280;
             display: block;
-            margin-top: 3px;
         }
-        
-        /* BOTÕES POR LOJA */
-        .botao-amazon {
-            background: #FFD814;
-            color: #000;
-            padding: 12px;
-            text-decoration: none;
-            text-align: center;
-            border-radius: 25px;
-            font-weight: 600;
-            margin-top: auto;
-            transition: background 0.2s;
-            border: 1px solid #FCD200;
-            font-size: 0.95em;
-        }
-        
-        .botao-amazon:hover {
-            background: #F7CA00;
-        }
-        
+
+        /* BOTÕES */
+        .botao-amazon,
         .botao-magalu {
-            background: #00A1FC;
-            color: white;
-            padding: 12px;
-            text-decoration: none;
+            padding: 14px;
+            border-radius: 30px;
             text-align: center;
-            border-radius: 25px;
+            text-decoration: none;
             font-weight: 600;
             margin-top: auto;
-            transition: background 0.2s;
+            transition: all 0.2s ease;
             font-size: 0.95em;
         }
-        
-        .botao-magalu:hover {
-            background: #0088CC;
+
+        .botao-amazon {
+            background: #facc15;
+            color: #111;
         }
-        
-        /* PAGINAÇÃO RESPONSIVA */
+
+        .botao-amazon:hover {
+            background: #eab308;
+        }
+
+        .botao-magalu {
+            background: #2563eb;
+            color: white;
+        }
+
+        .botao-magalu:hover {
+            background: #1d4ed8;
+        }
+
+        /* PAGINAÇÃO */
         .paginacao {
             display: flex;
             justify-content: center;
-            align-items: center;
-            gap: 6px;
-            margin: 30px 0;
+            gap: 8px;
+            margin: 40px 0;
             flex-wrap: wrap;
         }
-        
+
         .pagina-link {
             background: white;
-            color: #333;
-            padding: 8px 12px;
+            padding: 8px 14px;
+            border-radius: 8px;
             text-decoration: none;
-            border-radius: 6px;
+            color: #374151;
             font-weight: 500;
-            font-size: 0.9em;
             transition: all 0.2s;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            min-width: 36px;
-            text-align: center;
+            border: 1px solid #e5e7eb;
         }
-        
-        /* CELULAR: paginação compacta */
-        @media (max-width: 480px) {
-            .pagina-link {
-                padding: 6px 10px;
-                font-size: 0.8em;
-                min-width: 32px;
-            }
-            
-            .pagina-link:first-child,
-            .pagina-link:last-child {
-                display: inline-block;
-            }
-            
-            .pagina-link:not(.ativa):nth-child(n+5):nth-child(-n+8) {
-                display: none;
-            }
-        }
-        
+
         .pagina-link:hover {
-            background: #667eea;
+            background: #4f46e5;
             color: white;
         }
-        
+
         .pagina-link.ativa {
-            background: #667eea;
+            background: #4f46e5;
             color: white;
-            font-weight: bold;
         }
-        
-        /* MENSAGEM SEM PRODUTOS */
+
+        /* SEM PRODUTOS */
         .sem-produtos {
             text-align: center;
-            padding: 40px 20px;
+            padding: 50px 20px;
             background: white;
-            border-radius: 15px;
+            border-radius: 18px;
             margin: 30px 0;
         }
-        
-        .sem-produtos h2 {
-            color: #333;
-            font-size: 1.3em;
-            margin-bottom: 15px;
-        }
-        
-        .sem-produtos p {
-            color: #666;
-            margin-bottom: 15px;
-            font-size: 0.95em;
-        }
-        
-        .sem-produtos .botao-amazon {
-            display: inline-block;
-            padding: 12px 25px;
-        }
-        
-        /* FOOTER RESPONSIVO */
+
         footer {
             text-align: center;
-            color: white;
-            margin-top: 30px;
-            opacity: 0.9;
+            margin-top: 40px;
+            color: #6b7280;
             font-size: 0.85em;
-            padding: 15px 0;
         }
-        
+
         footer p {
-            margin: 3px 0;
+            margin: 4px 0;
         }
-        
-        /* MELHORIAS PARA TOQUE EM CELULAR */
-        @media (max-width: 768px) {
-            .botao-amazon, .botao-magalu {
-                padding: 14px;
-            }
-            
-            .pagina-link {
-                padding: 10px 12px;
-            }
-            
-            .produto:active {
-                background: #f5f5f5;
-            }
-        }
+
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🏆 Promoções Amazon <br>e Magalu para Bebês</h1>
-            <p class="subtitle">As melhores ofertas das duas lojas!</p>
-            
-            <div class="stats">
-                <span>📦 {{ total_produtos }} produtos</span>
-                <span class="total-produtos">Página {{ pagina_atual }}/{{ total_paginas }}</span>
-            </div>
-        </header>
-        
-        {% if produtos %}
-            <div class="produtos-grid">
-                {% for produto in produtos %}
-                    <div class="produto">
-                        <div class="produto-imagem">
-                            <img src="{{ produto[2] }}" 
-                                 alt="{{ produto[0] }}" 
-                                 loading="lazy"
-                                 onerror="this.src='https://via.placeholder.com/200x200?text=Imagem+Indispon%C3%ADvel'">
-                        </div>
-                        
-                        <div class="produto-info">
-                            <!-- BADGE DA LOJA - CORRIGIDO PARA CASE INSENSITIVE -->
-                            {% set loja = produto[4]|lower %}
-                            {% if loja == "amazon" %}
-                                <span class="loja-badge loja-amazon">🟡 Amazon</span>
-                            {% elif loja == "magalu" %}
-                                <span class="loja-badge loja-magalu">🔵 Magalu</span>
-                            {% else %}
-                                <span class="loja-badge" style="background: #999; color: white;">⚪ {{ produto[4] }}</span>
-                            {% endif %}
-                            
-                            <h3 class="produto-titulo">{{ produto[0] }}</h3>
-                            
-                            <div class="produto-preco">
-                                {% if produto[1] == "Ver preço" or produto[1] == "Preço indisponível" %}
-                                    <span class="preco-indisponivel">{{ produto[1] }}</span>
-                                {% else %}
-                                    {% if ',' in produto[1] %}
-                                        R$ {{ produto[1] }}
-                                    {% elif '.' in produto[1] %}
-                                        R$ {{ produto[1]|replace('.', ',') }}
-                                    {% else %}
-                                        R$ {{ produto[1] }},00
-                                    {% endif %}
-                                    <small>à vista</small>
-                                {% endif %}
-                            </div>
-                            
-                            <!-- BOTÃO COM COR DA LOJA - CORRIGIDO -->
-                            {% set loja = produto[4]|lower %}
-                            {% if loja == "amazon" %}
-                                <a href="{{ produto[3] }}" target="_blank" class="botao-amazon" rel="noopener noreferrer">
-                                    Ver na Amazon 🛒
-                                </a>
-                            {% elif loja == "magalu" %}
-                                <a href="{{ produto[3] }}" target="_blank" class="botao-magalu" rel="noopener noreferrer">
-                                    Ver no Magalu 🛒
-                                </a>
-                            {% else %}
-                                <a href="{{ produto[3] }}" target="_blank" class="botao-amazon" style="background: #999;" rel="noopener noreferrer">
-                                    Ver na Loja 🛒
-                                </a>
-                            {% endif %}
-                        </div>
+
+<div class="container">
+    <header>
+        <h1>🏆 Promoções Amazon e Magalu para Bebês</h1>
+        <p class="subtitle">As melhores ofertas das duas lojas!</p>
+
+        <div class="stats">
+            <span>📦 {{ total_produtos }} produtos</span>
+            <span class="total-produtos">Página {{ pagina_atual }}/{{ total_paginas }}</span>
+        </div>
+    </header>
+
+    {% if produtos %}
+        <div class="produtos-grid">
+            {% for produto in produtos %}
+                <div class="produto">
+                    <div class="produto-imagem">
+                        <img src="{{ produto[2] }}" 
+                             alt="{{ produto[0] }}" 
+                             loading="lazy"
+                             onerror="this.src='https://via.placeholder.com/200x200?text=Imagem+Indisponível'">
                     </div>
-                {% endfor %}
-            </div>
-            
-            <!-- PAGINAÇÃO RESPONSIVA -->
-            {% if total_paginas > 1 %}
-            <div class="paginacao">
-                {% if pagina_atual > 1 %}
-                    <a href="?pagina=1" class="pagina-link" aria-label="Primeira página">«</a>
-                    <a href="?pagina={{ pagina_atual - 1 }}" class="pagina-link" aria-label="Página anterior">‹</a>
-                {% endif %}
-                
-                {% for num in range(1, total_paginas + 1) %}
-                    {% if num == pagina_atual %}
-                        <span class="pagina-link ativa">{{ num }}</span>
-                    {% elif num >= pagina_atual - 2 and num <= pagina_atual + 2 %}
-                        <a href="?pagina={{ num }}" class="pagina-link">{{ num }}</a>
-                    {% endif %}
-                {% endfor %}
-                
-                {% if pagina_atual < total_paginas %}
-                    <a href="?pagina={{ pagina_atual + 1 }}" class="pagina-link" aria-label="Próxima página">›</a>
-                    <a href="?pagina={{ total_paginas }}" class="pagina-link" aria-label="Última página">»</a>
-                {% endif %}
-            </div>
-            {% endif %}
-            
-        {% else %}
-            <div class="sem-produtos">
-                <h2>😕 Nenhum produto encontrado</h2>
-                <p>Execute o crawler localmente e faça deploy do banco!</p>
-                <a href="/debug" class="botao-amazon">Ver diagnóstico</a>
-            </div>
-        {% endif %}
-        
-        <footer>
-            <p>Links de afiliado: lordumungus-20 (Amazon) | lordumungus (Magalu)</p>
-            <p>© 2024 - Promoções Amazon e Magalu</p>
-        </footer>
-    </div>
+
+                    <div class="produto-info">
+                        {% set loja = produto[4]|lower %}
+                        {% if loja == "amazon" %}
+                            <span class="loja-badge loja-amazon">Amazon</span>
+                        {% elif loja == "magalu" %}
+                            <span class="loja-badge loja-magalu">Magalu</span>
+                        {% endif %}
+
+                        <h3 class="produto-titulo">{{ produto[0] }}</h3>
+
+                        <div class="produto-preco">
+                            {% if produto[1] == "Ver preço" or produto[1] == "Preço indisponível" %}
+                                <span class="preco-indisponivel">{{ produto[1] }}</span>
+                            {% else %}
+                                R$ {{ produto[1]|replace('.', ',') }}
+                                <small>à vista</small>
+                            {% endif %}
+                        </div>
+
+                        {% if loja == "amazon" %}
+                            <a href="{{ produto[3] }}" target="_blank" class="botao-amazon">Ver na Amazon 🛒</a>
+                        {% elif loja == "magalu" %}
+                            <a href="{{ produto[3] }}" target="_blank" class="botao-magalu">Ver no Magalu 🛒</a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="sem-produtos">
+            <h2>😕 Nenhum produto encontrado</h2>
+            <p>Execute o crawler localmente e faça deploy do banco!</p>
+        </div>
+    {% endif %}
+
+    <footer>
+        <p>Links de afiliado: lordumungus-20 (Amazon) | lordumungus (Magalu)</p>
+        <p>© 2024 - Promoções Amazon e Magalu</p>
+    </footer>
+
+</div>
+
 </body>
 </html>
