@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Promoções Amazon para Bebês</title>
+    <title>Promoções Amazon e Magalu para Bebês</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <style>
         * {
@@ -141,6 +141,28 @@
             flex-direction: column;
         }
         
+        /* BADGE DA LOJA */
+        .loja-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75em;
+            font-weight: bold;
+            margin-bottom: 8px;
+            width: fit-content;
+        }
+        
+        .loja-amazon {
+            background: #FFD814;
+            color: #000;
+            border: 1px solid #FCD200;
+        }
+        
+        .loja-magalu {
+            background: #00A1FC;
+            color: white;
+        }
+        
         .produto-titulo {
             font-size: 1em;
             margin-bottom: 8px;
@@ -182,6 +204,7 @@
             margin-top: 3px;
         }
         
+        /* BOTÕES POR LOJA */
         .botao-amazon {
             background: #FFD814;
             color: #000;
@@ -198,6 +221,23 @@
         
         .botao-amazon:hover {
             background: #F7CA00;
+        }
+        
+        .botao-magalu {
+            background: #00A1FC;
+            color: white;
+            padding: 12px;
+            text-decoration: none;
+            text-align: center;
+            border-radius: 25px;
+            font-weight: 600;
+            margin-top: auto;
+            transition: background 0.2s;
+            font-size: 0.95em;
+        }
+        
+        .botao-magalu:hover {
+            background: #0088CC;
         }
         
         /* PAGINAÇÃO RESPONSIVA */
@@ -237,7 +277,6 @@
                 display: inline-block;
             }
             
-            /* Esconde alguns números em telas muito pequenas */
             .pagina-link:not(.ativa):nth-child(n+5):nth-child(-n+8) {
                 display: none;
             }
@@ -296,12 +335,12 @@
         
         /* MELHORIAS PARA TOQUE EM CELULAR */
         @media (max-width: 768px) {
-            .botao-amazon {
-                padding: 14px;  /* Maior área de toque */
+            .botao-amazon, .botao-magalu {
+                padding: 14px;
             }
             
             .pagina-link {
-                padding: 10px 12px;  /* Maior área de toque */
+                padding: 10px 12px;
             }
             
             .produto:active {
@@ -313,8 +352,8 @@
 <body>
     <div class="container">
         <header>
-            <h1>🏆 Promoções Amazon <br>para Bebês</h1>
-            <p class="subtitle">As melhores ofertas para seu pequeno!</p>
+            <h1>🏆 Promoções Amazon <br>e Magalu para Bebês</h1>
+            <p class="subtitle">As melhores ofertas das duas lojas!</p>
             
             <div class="stats">
                 <span>📦 {{ total_produtos }} produtos</span>
@@ -334,6 +373,13 @@
                         </div>
                         
                         <div class="produto-info">
+                            <!-- BADGE DA LOJA -->
+                            {% if produto[4] == "Amazon" %}
+                                <span class="loja-badge loja-amazon">🟡 Amazon</span>
+                            {% else %}
+                                <span class="loja-badge loja-magalu">🔵 Magalu</span>
+                            {% endif %}
+                            
                             <h3 class="produto-titulo">{{ produto[0] }}</h3>
                             
                             <div class="produto-preco">
@@ -351,9 +397,16 @@
                                 {% endif %}
                             </div>
                             
-                            <a href="{{ produto[3] }}" target="_blank" class="botao-amazon" rel="noopener noreferrer">
-                                Ver na Amazon 🛒
-                            </a>
+                            <!-- BOTÃO COM COR DA LOJA -->
+                            {% if produto[4] == "Amazon" %}
+                                <a href="{{ produto[3] }}" target="_blank" class="botao-amazon" rel="noopener noreferrer">
+                                    Ver na Amazon 🛒
+                                </a>
+                            {% else %}
+                                <a href="{{ produto[3] }}" target="_blank" class="botao-magalu" rel="noopener noreferrer">
+                                    Ver no Magalu 🛒
+                                </a>
+                            {% endif %}
                         </div>
                     </div>
                 {% endfor %}
@@ -391,8 +444,8 @@
         {% endif %}
         
         <footer>
-            <p>Links de afiliado: lordumungus-20</p>
-            <p>© 2024 - Promoções Amazon</p>
+            <p>Links de afiliado: lordumungus-20 (Amazon) | lordumungus (Magalu)</p>
+            <p>© 2024 - Promoções Amazon e Magalu</p>
         </footer>
     </div>
 </body>
