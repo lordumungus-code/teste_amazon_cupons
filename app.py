@@ -1,15 +1,19 @@
-from flask import Flask, render_template, request
-import sqlite3
 import os
+import sqlite3
+from flask import Flask, render_template, request
 import math
 
 app = Flask(__name__)
 
-# Usa o caminho do volume se existir, senão usa local
+# CORREÇÃO: Usar caminho ABSOLUTO com base no diretório do app
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, 'produtos.db')
+
+# Se estiver usando volume do Railway
 if 'RAILWAY_VOLUME_MOUNT_PATH' in os.environ:
     DB_PATH = os.path.join(os.environ['RAILWAY_VOLUME_MOUNT_PATH'], 'produtos.db')
-else:
-    DB_PATH = 'produtos.db'  # caminho local para desenvolvimento
+
+print(f"📁 Procurando banco em: {DB_PATH}")  # Isso aparece nos logs
 
 PRODUTOS_POR_PAGINA = 12
 
@@ -22,19 +26,16 @@ def index():
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
         
-        # Garante que a tabela existe
-        cursor.execute("""
-        CREATE TABLE IF NOT EXISTS produtos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nome TEXT,
-            preco TEXT,
-            imagem TEXT,
-            link TEXT
-        )
-        """)
+        # Verifica se tabela existe
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='produtos'")
+        if not cursor.fetchone():
+            return "Tabela 'produtos' não encontrada. Execute o crawler primeiro!"
         
         cursor.execute("SELECT COUNT(*) FROM produtos")
         total_produtos = cursor.fetchone()[0]
+        
+        if total_produtos == 0:
+            return "Nenhum produto encontrado. Execute o crawler primeiro!"
         
         cursor.execute("""
             SELECT nome, preco, imagem, link 
@@ -54,8 +55,31 @@ def index():
                              total_paginas=total_paginas,
                              total_produtos=total_produtos)
     
+    except sqlite3.Error as e:
+        return f"Erro no banco de dados: {e}"
     except Exception as e:
         return f"Erro: {e}"
+
+# Rota de diagnóstico (temporária)
+@app.route("/debug")
+def debug():
+    info = []
+    info.append(f"BASE_DIR: {BASE_DIR}")
+    info.append(f"DB_PATH: {DB_PATH}")
+    info.append(f"Arquivos: {os.listdir(BASE_DIR)}")
+    
+    if os.path.exists(DB_PATH):
+        info.append("✅ Banco existe!")
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM produtos")
+        count = cursor.fetchone()[0]
+        info.append(f"Produtos: {count}")
+        conn.close()
+    else:
+        info.append("❌ Banco NÃO existe")
+    
+    return "<br>".join(info)
 
 if __name__ == "__main__":
     app.run(debug=True)
