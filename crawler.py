@@ -121,100 +121,6 @@ def extrair_link_amazon(produto):
             continue
     return None
 
-# ==================== MAGALU ====================
-def extrair_nome_magalu(produto):
-    """Extrai nome do produto no Magalu"""
-    selectores = [
-        "[data-testid='product-title']",
-        "h2.sc-eDvSVe",
-        ".sc-khIgEk",
-        "h2",
-        ".product-title",
-        "a.sc-dLMFU h2",
-        "span.sc-kpDqfm"
-    ]
-    
-    for seletor in selectores:
-        try:
-            elemento = produto.find_element(By.CSS_SELECTOR, seletor)
-            nome = elemento.text.strip()
-            if nome and len(nome) > 5:
-                return nome
-        except:
-            continue
-    return None
-
-def extrair_preco_magalu(produto):
-    """Extrai preço do produto no Magalu"""
-    selectores_preco = [
-        "[data-testid='price-value']",
-        ".sc-bXCLTC",
-        ".sc-bwCtUz",
-        ".price-tag",
-        ".andes-money-amount__fraction",
-        "div.sc-fqkvVR",
-        "span.sc-iGgWBj"
-    ]
-    
-    for seletor in selectores_preco:
-        try:
-            elemento = produto.find_element(By.CSS_SELECTOR, seletor)
-            preco_texto = elemento.text.strip()
-            # Remove R$ e pontos, mantém vírgula
-            preco_texto = preco_texto.replace('R$', '').replace('.', '').strip()
-            match = re.search(r'[\d,]+', preco_texto)
-            if match:
-                return match.group()
-        except:
-            continue
-    
-    return "Preço indisponível"
-
-def extrair_imagem_magalu(produto):
-    """Extrai URL da imagem no Magalu"""
-    selectores_img = [
-        "img.sc-fqkvVR",
-        "img[data-testid='image']",
-        "img"
-    ]
-    
-    for seletor in selectores_img:
-        try:
-            img = produto.find_element(By.CSS_SELECTOR, seletor)
-            src = img.get_attribute("src")
-            if src and src.startswith("http"):
-                # Tenta pegar imagem maior
-                src = src.replace("50x50", "200x200").replace("100x100", "200x200")
-                return src
-        except:
-            continue
-    
-    return "https://via.placeholder.com/200x200?text=Magalu"
-
-def extrair_link_magalu(produto):
-    """Extrai link do produto no Magalu e adiciona tag de afiliado"""
-    selectores_link = [
-        "a.sc-dLMFU",
-        "a[data-testid='product-card-link']",
-        "a"
-    ]
-    
-    for seletor in selectores_link:
-        try:
-            link_elem = produto.find_element(By.CSS_SELECTOR, seletor)
-            link = link_elem.get_attribute("href")
-            if link and "magazineluiza.com.br" in link:
-                # Limpa o link e adiciona a tag de afiliado
-                # Formato correto para afiliado Magalu: ?parceiro=SEU_ID
-                if '?' in link:
-                    link = link.split('?')[0]
-                link += f"?parceiro={PARTNER_TAG_MAGALU}"
-                return link
-        except:
-            continue
-    return None
-
-# ==================== BUSCA AMAZON ====================
 def buscar_amazon(driver, keyword):
     print(f"\n🟡 AMAZON - Buscando: {keyword}")
     url = f"https://www.amazon.com.br/s?k={keyword}"
@@ -232,7 +138,7 @@ def buscar_amazon(driver, keyword):
     resultados = []
     contador = 0
     
-    for produto in produtos[:12]:  # Limite de 12 por loja
+    for produto in produtos[:12]:
         try:
             nome = extrair_nome_amazon(produto)
             if not nome:
@@ -256,32 +162,169 @@ def buscar_amazon(driver, keyword):
     
     return resultados
 
-# ==================== BUSCA MAGALU ====================
+# ==================== MAGALU ====================
+def extrair_nome_magalu(produto):
+    """Extrai nome do produto no Magalu"""
+    selectores = [
+        "[data-testid='product-title']",
+        "h2.sc-eDvSVe",
+        ".sc-khIgEk",
+        "h2",
+        ".product-title",
+        "a.sc-dLMFU h2",
+        "span.sc-kpDqfm",
+        "div.sc-fqkvVR",
+        "h2",
+        "span[class*='sc-']"
+    ]
+    
+    for seletor in selectores:
+        try:
+            elementos = produto.find_elements(By.CSS_SELECTOR, seletor)
+            for elem in elementos:
+                nome = elem.text.strip()
+                if nome and len(nome) > 5:
+                    return nome
+        except:
+            continue
+    return None
+
+def extrair_preco_magalu(produto):
+    """Extrai preço do produto no Magalu"""
+    selectores_preco = [
+        "[data-testid='price-value']",
+        ".sc-bXCLTC",
+        ".sc-bwCtUz",
+        ".price-tag",
+        ".andes-money-amount__fraction",
+        "div.sc-fqkvVR",
+        "span.sc-iGgWBj",
+        ".sc-eWnToP",
+        "span[class*='price']",
+        "div[class*='price']"
+    ]
+    
+    for seletor in selectores_preco:
+        try:
+            elementos = produto.find_elements(By.CSS_SELECTOR, seletor)
+            for elem in elementos:
+                preco_texto = elem.text.strip()
+                if preco_texto:
+                    # Remove R$ e pontos, mantém vírgula
+                    preco_texto = preco_texto.replace('R$', '').replace('.', '').strip()
+                    match = re.search(r'[\d,]+', preco_texto)
+                    if match:
+                        return match.group()
+        except:
+            continue
+    
+    return "Preço indisponível"
+
+def extrair_imagem_magalu(produto):
+    """Extrai URL da imagem no Magalu"""
+    selectores_img = [
+        "img.sc-fqkvVR",
+        "img[data-testid='image']",
+        "img"
+    ]
+    
+    for seletor in selectores_img:
+        try:
+            imagens = produto.find_elements(By.CSS_SELECTOR, seletor)
+            for img in imagens:
+                src = img.get_attribute("src")
+                if src and src.startswith("http"):
+                    # Tenta pegar imagem maior
+                    src = src.replace("50x50", "200x200").replace("100x100", "200x200")
+                    return src
+        except:
+            continue
+    
+    return "https://via.placeholder.com/200x200?text=Magalu"
+
+def extrair_link_magalu(produto):
+    """Extrai link do produto no Magalu e adiciona tag de afiliado"""
+    selectores_link = [
+        "a.sc-dLMFU",
+        "a[data-testid='product-card-link']",
+        "a"
+    ]
+    
+    for seletor in selectores_link:
+        try:
+            links = produto.find_elements(By.CSS_SELECTOR, seletor)
+            for link_elem in links:
+                link = link_elem.get_attribute("href")
+                if link and "magazineluiza.com.br" in link:
+                    # Limpa o link e adiciona a tag de afiliado
+                    if '?' in link:
+                        link = link.split('?')[0]
+                    link += f"?parceiro={PARTNER_TAG_MAGALU}"
+                    return link
+        except:
+            continue
+    return None
+
 def buscar_magalu(driver, keyword):
+    """Busca produtos no Magalu"""
     print(f"\n🔵 MAGALU - Buscando: {keyword}")
     url = f"https://www.magazineluiza.com.br/busca/{keyword}/"
     driver.get(url)
-    time.sleep(4)  # Magalu pode ser mais lento
+    
+    # Aguarda carregar
+    time.sleep(4)
     
     # Rola a página para carregar mais produtos
     driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
     time.sleep(2)
     
-    # Tenta diferentes seletores para produtos do Magalu
-    produtos = driver.find_elements(By.CSS_SELECTOR, "[data-testid='product-list'] > div")
-    if not produtos:
-        produtos = driver.find_elements(By.CSS_SELECTOR, ".sc-eDvSVe")
-    if not produtos:
-        produtos = driver.find_elements(By.CSS_SELECTOR, ".sc-iapWAC")
-    if not produtos:
-        produtos = driver.find_elements(By.CSS_SELECTOR, "li[data-testid='product-card']")
+    # Tenta diferentes seletores para encontrar produtos
+    todos_produtos = []
     
-    print(f"  📦 Encontrados {len(produtos)} produtos no Magalu")
+    # Seletor 1: data-testid
+    try:
+        produtos = driver.find_elements(By.CSS_SELECTOR, "[data-testid='product-list'] > div")
+        todos_produtos.extend(produtos)
+    except:
+        pass
+    
+    # Seletor 2: sc-eDvSVe
+    try:
+        produtos = driver.find_elements(By.CSS_SELECTOR, ".sc-eDvSVe")
+        todos_produtos.extend(produtos)
+    except:
+        pass
+    
+    # Seletor 3: li[data-testid]
+    try:
+        produtos = driver.find_elements(By.CSS_SELECTOR, "li[data-testid='product-card']")
+        todos_produtos.extend(produtos)
+    except:
+        pass
+    
+    # Seletor 4: div[class*="sc-"]
+    try:
+        produtos = driver.find_elements(By.CSS_SELECTOR, "div[class*='sc-']")
+        for p in produtos[:20]:
+            if p.text and len(p.text) > 20:
+                todos_produtos.append(p)
+    except:
+        pass
+    
+    # Remove duplicatas mantendo a ordem
+    produtos_unicos = []
+    seen = set()
+    for p in todos_produtos:
+        if p not in seen:
+            seen.add(p)
+            produtos_unicos.append(p)
+    
+    print(f"  📦 Encontrados {len(produtos_unicos)} produtos no Magalu")
     
     resultados = []
     contador = 0
     
-    for produto in produtos[:12]:  # Limite de 12 por loja
+    for produto in produtos_unicos[:15]:
         try:
             nome = extrair_nome_magalu(produto)
             if not nome:
@@ -323,12 +366,12 @@ def atualizar_banco(resultados):
     )
     """)
     
-    # Limpa produtos antigos (opcional - comentar se quiser acumular)
+    # Limpa produtos antigos
     cursor.execute("DELETE FROM produtos")
     print("🗑️ Banco antigo limpo")
     
     # Insere os novos produtos
-    for i, produto in enumerate(resultados[:48], 1):  # Máximo 48 produtos (24 de cada loja)
+    for i, produto in enumerate(resultados[:48], 1):
         cursor.execute("""
         INSERT INTO produtos (nome, preco, imagem, link, loja)
         VALUES (?, ?, ?, ?, ?)
@@ -349,62 +392,100 @@ def atualizar_banco(resultados):
     for loja, qtd in stats:
         print(f"   • {loja}: {qtd} produtos")
 
+# ==================== DEBUG MAGALU ====================
+def debug_magalu(driver, keyword):
+    """Versão de debug para testar o Magalu"""
+    print(f"\n🔵 MAGALU (DEBUG) - Buscando: {keyword}")
+    print(f"  URL: https://www.magazineluiza.com.br/busca/{keyword}/")
+    
+    driver.get(f"https://www.magazineluiza.com.br/busca/{keyword}/")
+    time.sleep(5)
+    
+    # Salva screenshot
+    screenshot = f"magalu_debug_{keyword}.png"
+    driver.save_screenshot(screenshot)
+    print(f"  📸 Screenshot salvo: {screenshot}")
+    
+    # Mostra título da página
+    print(f"  📄 Título da página: {driver.title}")
+    
+    # Lista todos os elementos com classe começando com sc-
+    print("\n  🔍 Elementos com classe 'sc-':")
+    elementos_sc = driver.find_elements(By.CSS_SELECTOR, "[class*='sc-']")
+    for i, elem in enumerate(elementos_sc[:10]):
+        print(f"    {i+1}. Classe: {elem.get_attribute('class')}")
+        print(f"       Texto: {elem.text[:50]}")
+    
+    # Busca produtos
+    return buscar_magalu(driver, keyword)
+
 # ==================== MAIN ====================
-print("🚀 Iniciando crawler multi-lojas (Amazon + Magalu)")
-print(f"🎯 Tags: Amazon={PARTNER_TAG_AMAZON}, Magalu={PARTNER_TAG_MAGALU}")
-print("=" * 50)
-
-driver = configurar_driver()
-todos_produtos = []
-total_amazon = 0
-total_magalu = 0
-
-try:
-    for keyword in KEYWORDS:
-        print(f"\n{'='*50}")
-        print(f"🔎 PALAVRA-CHAVE: {keyword.upper()}")
-        print(f"{'='*50}")
-        
-        # Busca na Amazon
-        produtos_amazon = buscar_amazon(driver, keyword)
-        todos_produtos.extend(produtos_amazon)
-        total_amazon += len(produtos_amazon)
-        
-        # Pequena pausa entre lojas
-        time.sleep(2)
-        
-        # Busca no Magalu
-        produtos_magalu = buscar_magalu(driver, keyword)
-        todos_produtos.extend(produtos_magalu)
-        total_magalu += len(produtos_magalu)
-        
-        print(f"\n📊 Parcial: Amazon={total_amazon}, Magalu={total_magalu}, Total={len(todos_produtos)}")
-        
-        if len(todos_produtos) >= 48:
-            print("\n🛑 Atingido limite de 48 produtos")
-            break
-        
-        time.sleep(3)
+def main():
+    print("🚀 Iniciando crawler multi-lojas (Amazon + Magalu)")
+    print(f"🎯 Tags: Amazon={PARTNER_TAG_AMAZON}, Magalu={PARTNER_TAG_MAGALU}")
+    print("=" * 60)
     
-    print(f"\n{'='*50}")
-    print(f"📊 RESUMO FINAL")
-    print(f"{'='*50}")
-    print(f"Amazon: {total_amazon} produtos")
-    print(f"Magalu: {total_magalu} produtos")
-    print(f"Total: {len(todos_produtos)} produtos")
+    driver = configurar_driver()
+    todos_produtos = []
+    total_amazon = 0
+    total_magalu = 0
     
-    if len(todos_produtos) == 0:
-        print("\n❌ Nenhum produto encontrado!")
-        print("⚠️ Possíveis causas:")
-        print("   - Sites bloquearam o acesso")
-        print("   - Seletores CSS desatualizados")
-        print("   - Problema de rede")
+    try:
+        # Escolha qual modo usar:
+        MODO_DEBUG = True  # Mude para False para executar normalmente
+        
+        for keyword in KEYWORDS:
+            print(f"\n{'='*60}")
+            print(f"🔎 PALAVRA-CHAVE: {keyword.upper()}")
+            print(f"{'='*60}")
+            
+            # Busca na Amazon
+            produtos_amazon = buscar_amazon(driver, keyword)
+            todos_produtos.extend(produtos_amazon)
+            total_amazon += len(produtos_amazon)
+            
+            time.sleep(2)
+            
+            # Busca no Magalu (modo normal ou debug)
+            if MODO_DEBUG:
+                # Primeira keyword em modo debug
+                if keyword == KEYWORDS[0]:
+                    produtos_magalu = debug_magalu(driver, keyword)
+                else:
+                    produtos_magalu = buscar_magalu(driver, keyword)
+            else:
+                produtos_magalu = buscar_magalu(driver, keyword)
+            
+            todos_produtos.extend(produtos_magalu)
+            total_magalu += len(produtos_magalu)
+            
+            print(f"\n📊 Parcial: Amazon={total_amazon}, Magalu={total_magalu}, Total={len(todos_produtos)}")
+            
+            if len(todos_produtos) >= 48:
+                print("\n🛑 Atingido limite de 48 produtos")
+                break
+            
+            time.sleep(3)
+        
+        print(f"\n{'='*60}")
+        print(f"📊 RESUMO FINAL")
+        print(f"{'='*60}")
+        print(f"Amazon: {total_amazon} produtos")
+        print(f"Magalu: {total_magalu} produtos")
+        print(f"Total: {len(todos_produtos)} produtos")
+        
+        if len(todos_produtos) == 0:
+            print("\n❌ Nenhum produto encontrado!")
+            driver.quit()
+            return
+        
+        # Salva no banco
+        atualizar_banco(todos_produtos)
+        
+    finally:
         driver.quit()
-        exit()
-    
-    # Salva no banco
-    atualizar_banco(todos_produtos)
+        print("\n👋 Driver encerrado")
 
-finally:
-    driver.quit()
-    print("\n👋 Driver encerrado")
+# ==================== EXECUTAR ====================
+if __name__ == "__main__":
+    main()
