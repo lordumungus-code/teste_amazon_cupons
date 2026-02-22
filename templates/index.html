@@ -1,322 +1,644 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
-    <title>Promoções Amazon e Magalu para Bebês</title>
+    <title>🍼 Promoções para Bebês | Amazon & Magalu</title>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <meta name="description" content="As melhores ofertas para bebês da Amazon e Magalu em um só lugar">
+    <meta name="theme-color" content="#667eea">
     
     <style>
+        /* RESET E VARIÁVEIS */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5a67d8;
+            --secondary: #764ba2;
+            --amazon: #FFD814;
+            --amazon-dark: #F7CA00;
+            --magalu: #00A1FC;
+            --magalu-dark: #0088CC;
+            --success: #2ecc71;
+            --text-dark: #333;
+            --text-light: #666;
+            --bg-light: #f8f9fa;
+            --shadow: 0 5px 15px rgba(0,0,0,0.1);
+            --shadow-hover: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-            background: linear-gradient(135deg, #eef2ff 0%, #f8fafc 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             min-height: 100vh;
-            padding: 12px;
+            padding: clamp(8px, 2vw, 20px);
         }
 
         .container {
-            max-width: 1300px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
-        /* HEADER */
+        /* UTILITÁRIOS */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+        }
+
+        /* HEADER MELHORADO */
         header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(8px);
-            padding: 25px;
-            border-radius: 18px;
-            margin-bottom: 25px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            background: white;
+            padding: clamp(15px, 3vw, 25px);
+            border-radius: 20px;
+            margin-bottom: clamp(15px, 3vw, 25px);
+            box-shadow: var(--shadow);
+            transition: box-shadow 0.3s ease;
+        }
+
+        header:hover {
+            box-shadow: var(--shadow-hover);
         }
 
         h1 {
-            color: #111827;
-            font-size: 1.9em;
-            margin-bottom: 8px;
+            color: var(--text-dark);
+            font-size: clamp(1.3em, 4vw, 2.2em);
+            margin-bottom: 10px;
+            line-height: 1.3;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
         }
 
         .subtitle {
-            color: #6b7280;
-            font-size: 0.95em;
+            color: var(--text-light);
+            font-size: clamp(0.9em, 2.5vw, 1.1em);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .stats {
-            background: #f3f4f6;
-            padding: 12px;
-            border-radius: 12px;
+            background: var(--bg-light);
+            padding: 15px;
+            border-radius: 15px;
             margin-top: 15px;
             display: flex;
             justify-content: space-between;
+            align-items: center;
             flex-wrap: wrap;
+            gap: 12px;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .stats-info {
+            display: flex;
+            align-items: center;
             gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .stats-icon {
+            background: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
         .total-produtos {
-            background: #4f46e5;
+            background: var(--primary);
             color: white;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 0.85em;
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.9em;
+            white-space: nowrap;
+            box-shadow: 0 2px 5px rgba(102,126,234,0.3);
         }
 
-        /* GRID */
+        /* GRADE DE PRODUTOS */
         .produtos-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
+            gap: clamp(12px, 2vw, 20px);
+            margin-bottom: 30px;
         }
 
         @media (max-width: 600px) {
             .produtos-grid {
                 grid-template-columns: 1fr;
             }
+        }
 
-            h1 {
-                font-size: 1.6em;
+        @media (min-width: 601px) and (max-width: 900px) {
+            .produtos-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
 
-        /* CARD */
+        /* CARD DE PRODUTO MELHORADO */
         .produto {
             background: white;
-            border-radius: 18px;
+            border-radius: 16px;
             overflow: hidden;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
-            transition: all 0.25s ease;
-            border: 1px solid rgba(0,0,0,0.04);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+            height: 100%;
+            position: relative;
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
         }
 
         .produto:hover {
             transform: translateY(-5px);
-            box-shadow: 0 12px 25px rgba(0,0,0,0.12);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
         }
 
+        .produto:active {
+            transform: translateY(-2px);
+        }
+
+        /* IMAGEM COM OVERLAY */
         .produto-imagem {
+            position: relative;
             height: 200px;
             padding: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #f9fafb;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            overflow: hidden;
+        }
+
+        .produto-imagem::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.02) 100%);
+            pointer-events: none;
         }
 
         .produto-imagem img {
             max-width: 100%;
             max-height: 170px;
+            width: auto;
+            height: auto;
             object-fit: contain;
+            transition: transform 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .produto:hover .produto-imagem img {
+            transform: scale(1.05);
         }
 
         .produto-info {
             padding: 18px;
+            flex-grow: 1;
             display: flex;
             flex-direction: column;
-            flex-grow: 1;
+            background: white;
         }
 
-        /* BADGES */
+        /* BADGE DA LOJA MELHORADA */
         .loja-badge {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
             padding: 5px 12px;
-            border-radius: 25px;
-            font-size: 0.75em;
-            font-weight: bold;
-            margin-bottom: 10px;
+            border-radius: 30px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-bottom: 12px;
+            width: fit-content;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
         }
 
         .loja-amazon {
-            background: #facc15;
-            color: #111;
+            background: var(--amazon);
+            color: #000;
+            border: 1px solid var(--amazon-dark);
         }
 
         .loja-magalu {
-            background: #2563eb;
+            background: var(--magalu);
+            color: white;
+            border: 1px solid var(--magalu-dark);
+        }
+
+        .loja-outra {
+            background: #6c757d;
             color: white;
         }
 
-        /* TÍTULO */
         .produto-titulo {
-            font-size: 1em;
-            margin-bottom: 10px;
-            color: #1f2937;
-            line-height: 1.4;
-            min-height: 3em;
+            font-size: 1.1em;
+            margin-bottom: 12px;
+            color: var(--text-dark);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
             overflow: hidden;
+            min-height: 2.8em;
+            line-height: 1.4;
+            font-weight: 500;
         }
 
-        /* PREÇO */
+        /* PREÇO COM ANIMAÇÃO */
         .produto-preco {
-            font-size: 1.7em;
-            font-weight: bold;
-            color: #16a34a;
-            margin: 8px 0;
+            font-size: clamp(1.4em, 4vw, 1.8em);
+            font-weight: 800;
+            color: var(--success);
+            margin: 10px 0;
+            line-height: 1.2;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .preco-valor {
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+        }
+
+        .preco-valor .simbolo {
+            font-size: 0.7em;
+            color: var(--text-light);
         }
 
         .preco-indisponivel {
-            color: #9ca3af;
-            font-size: 1em;
+            color: #999;
+            font-size: 0.7em;
+            font-weight: normal;
+            font-style: italic;
         }
 
-        .produto-preco small {
-            font-size: 0.55em;
-            color: #6b7280;
-            display: block;
+        .preco-parcelamento {
+            font-size: 0.5em;
+            color: var(--text-light);
+            font-weight: normal;
+            margin-top: 4px;
         }
 
-        /* BOTÕES */
-        .botao-amazon,
-        .botao-magalu {
-            padding: 14px;
-            border-radius: 30px;
-            text-align: center;
+        /* BOTÕES MELHORADOS */
+        .botao-amazon, .botao-magalu, .botao-padrao {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 20px;
             text-decoration: none;
+            text-align: center;
+            border-radius: 40px;
             font-weight: 600;
             margin-top: auto;
             transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
             font-size: 0.95em;
+            letter-spacing: 0.3px;
+            position: relative;
+            overflow: hidden;
         }
 
         .botao-amazon {
-            background: #facc15;
-            color: #111;
+            background: var(--amazon);
+            color: #000;
+            border: 1px solid var(--amazon-dark);
         }
 
         .botao-amazon:hover {
-            background: #eab308;
+            background: var(--amazon-dark);
+            transform: scale(1.02);
         }
 
         .botao-magalu {
-            background: #2563eb;
+            background: var(--magalu);
             color: white;
+            border: 1px solid var(--magalu-dark);
         }
 
         .botao-magalu:hover {
-            background: #1d4ed8;
+            background: var(--magalu-dark);
+            transform: scale(1.02);
         }
 
-        /* PAGINAÇÃO */
+        .botao-padrao {
+            background: var(--primary);
+            color: white;
+        }
+
+        .botao-padrao:hover {
+            background: var(--primary-dark);
+        }
+
+        .botao-amazon:active, .botao-magalu:active, .botao-padrao:active {
+            transform: scale(0.98);
+        }
+
+        /* PAGINAÇÃO MELHORADA */
         .paginacao {
             display: flex;
             justify-content: center;
+            align-items: center;
             gap: 8px;
-            margin: 40px 0;
+            margin: 35px 0 20px;
             flex-wrap: wrap;
         }
 
         .pagina-link {
             background: white;
-            padding: 8px 14px;
-            border-radius: 8px;
+            color: var(--text-dark);
+            padding: 10px 15px;
             text-decoration: none;
-            color: #374151;
+            border-radius: 10px;
             font-weight: 500;
-            transition: all 0.2s;
-            border: 1px solid #e5e7eb;
+            font-size: 0.95em;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            min-width: 42px;
+            text-align: center;
+            border: 1px solid transparent;
         }
 
         .pagina-link:hover {
-            background: #4f46e5;
+            background: var(--primary);
             color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102,126,234,0.3);
         }
 
         .pagina-link.ativa {
-            background: #4f46e5;
+            background: var(--primary);
             color: white;
+            font-weight: 700;
+            border-color: var(--primary-dark);
+            cursor: default;
         }
 
-        /* SEM PRODUTOS */
+        .pagina-link.ativa:hover {
+            transform: none;
+        }
+
+        @media (max-width: 480px) {
+            .pagina-link {
+                padding: 8px 12px;
+                min-width: 38px;
+                font-size: 0.9em;
+            }
+        }
+
+        /* MENSAGEM SEM PRODUTOS */
         .sem-produtos {
             text-align: center;
-            padding: 50px 20px;
+            padding: 50px 25px;
             background: white;
-            border-radius: 18px;
+            border-radius: 25px;
             margin: 30px 0;
+            box-shadow: var(--shadow);
         }
 
+        .sem-produtos h2 {
+            color: var(--text-dark);
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+
+        .sem-produtos p {
+            color: var(--text-light);
+            margin-bottom: 25px;
+            font-size: 1.1em;
+        }
+
+        .sem-produtos .botao-padrao {
+            display: inline-flex;
+            padding: 14px 35px;
+        }
+
+        /* FOOTER */
         footer {
             text-align: center;
+            color: white;
             margin-top: 40px;
-            color: #6b7280;
-            font-size: 0.85em;
+            opacity: 0.9;
+            font-size: 0.9em;
+            padding: 20px 0;
+            border-top: 1px solid rgba(255,255,255,0.2);
         }
 
         footer p {
-            margin: 4px 0;
+            margin: 5px 0;
         }
 
+        /* ANIMAÇÕES */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .produto {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        /* MELHORIAS PARA TOQUE */
+        @media (max-width: 768px) {
+            .botao-amazon, .botao-magalu, .botao-padrao {
+                padding: 16px 20px;
+                font-size: 1em;
+            }
+
+            .pagina-link {
+                padding: 12px 15px;
+            }
+
+            .produto:active {
+                background: #f8f9fa;
+            }
+        }
+
+        /* SKELETON LOADING */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* MODO ESCURO (OPCIONAL) */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: linear-gradient(135deg, #4a5fc1 0%, #5a3d8c 100%);
+            }
+        }
     </style>
 </head>
 <body>
+    <div class="container">
+        <header>
+            <h1>
+                <span aria-hidden="true">🍼</span> 
+                Promoções para Bebês
+                <span class="sr-only">-</span>
+                <small style="font-size: 0.6em; color: var(--text-light);">Amazon & Magalu</small>
+            </h1>
+            <p class="subtitle">
+                <span aria-hidden="true">✨</span>
+                As melhores ofertas das duas lojas em um só lugar
+            </p>
+            
+            <div class="stats">
+                <div class="stats-info">
+                    <span class="stats-icon" aria-hidden="true">📦</span>
+                    <span><strong>{{ total_produtos }}</strong> produtos encontrados</span>
+                </div>
+                <span class="total-produtos" aria-label="Página {{ pagina_atual }} de {{ total_paginas }}">
+                    Página {{ pagina_atual }}/{{ total_paginas }}
+                </span>
+            </div>
+        </header>
 
-<div class="container">
-    <header>
-        <h1>🏆 Promoções Amazon e Magalu para Bebês</h1>
-        <p class="subtitle">As melhores ofertas das duas lojas!</p>
-
-        <div class="stats">
-            <span>📦 {{ total_produtos }} produtos</span>
-            <span class="total-produtos">Página {{ pagina_atual }}/{{ total_paginas }}</span>
-        </div>
-    </header>
-
-    {% if produtos %}
-        <div class="produtos-grid">
-            {% for produto in produtos %}
-                <div class="produto">
-                    <div class="produto-imagem">
-                        <img src="{{ produto[2] }}" 
-                             alt="{{ produto[0] }}" 
-                             loading="lazy"
-                             onerror="this.src='https://via.placeholder.com/200x200?text=Imagem+Indisponível'">
-                    </div>
-
-                    <div class="produto-info">
-                        {% set loja = produto[4]|lower %}
-                        {% if loja == "amazon" %}
-                            <span class="loja-badge loja-amazon">Amazon</span>
-                        {% elif loja == "magalu" %}
-                            <span class="loja-badge loja-magalu">Magalu</span>
-                        {% endif %}
-
-                        <h3 class="produto-titulo">{{ produto[0] }}</h3>
-
-                        <div class="produto-preco">
-                            {% if produto[1] == "Ver preço" or produto[1] == "Preço indisponível" %}
-                                <span class="preco-indisponivel">{{ produto[1] }}</span>
+        {% if produtos %}
+            <div class="produtos-grid">
+                {% for produto in produtos %}
+                    <article class="produto" itemscope itemtype="https://schema.org/Product">
+                        <div class="produto-imagem">
+                            <img src="{{ produto[2] }}" 
+                                 alt="{{ produto[0] }}" 
+                                 loading="lazy"
+                                 itemprop="image"
+                                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\' viewBox=\'0 0 200 200\'%3E%3Crect width=\'200\' height=\'200\' fill=\'%23f0f0f0\'/%3E%3Ctext x=\'50\' y=\'115\' font-family=\'Arial\' font-size=\'14\' fill=\'%23999\'%3EImagem%3C/text%3E%3Ctext x=\'45\' y=\'135\' font-family=\'Arial\' font-size=\'14\' fill=\'%23999\'%3Eindisponível%3C/text%3E%3C/svg%3E'">
+                        </div>
+                        
+                        <div class="produto-info">
+                            {% set loja = produto[4]|lower %}
+                            
+                            {% if loja == "amazon" %}
+                                <span class="loja-badge loja-amazon">
+                                    <span aria-hidden="true">🟡</span> Amazon
+                                </span>
+                            {% elif loja == "magalu" %}
+                                <span class="loja-badge loja-magalu">
+                                    <span aria-hidden="true">🔵</span> Magalu
+                                </span>
                             {% else %}
-                                R$ {{ produto[1]|replace('.', ',') }}
-                                <small>à vista</small>
+                                <span class="loja-badge loja-outra">
+                                    <span aria-hidden="true">⚪</span> {{ produto[4] }}
+                                </span>
+                            {% endif %}
+                            
+                            <h3 class="produto-titulo" itemprop="name">{{ produto[0] }}</h3>
+                            
+                            <div class="produto-preco" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+                                {% if produto[1] == "Ver preço" or produto[1] == "Preço indisponível" %}
+                                    <span class="preco-indisponivel">{{ produto[1] }}</span>
+                                {% else %}
+                                    <div class="preco-valor">
+                                        <span class="simbolo">R$</span>
+                                        <span itemprop="price">
+                                            {% if ',' in produto[1] %}
+                                                {{ produto[1] }}
+                                            {% elif '.' in produto[1] %}
+                                                {{ produto[1]|replace('.', ',') }}
+                                            {% else %}
+                                                {{ produto[1] }},00
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                    <meta itemprop="priceCurrency" content="BRL">
+                                    <span class="preco-parcelamento">à vista no PIX ou boleto</span>
+                                {% endif %}
+                            </div>
+                            
+                            {% if loja == "amazon" %}
+                                <a href="{{ produto[3] }}" target="_blank" class="botao-amazon" rel="noopener noreferrer" itemprop="url">
+                                    <span>Ver na Amazon</span>
+                                    <span aria-hidden="true">🛒</span>
+                                </a>
+                            {% elif loja == "magalu" %}
+                                <a href="{{ produto[3] }}" target="_blank" class="botao-magalu" rel="noopener noreferrer" itemprop="url">
+                                    <span>Ver no Magalu</span>
+                                    <span aria-hidden="true">🛒</span>
+                                </a>
+                            {% else %}
+                                <a href="{{ produto[3] }}" target="_blank" class="botao-padrao" rel="noopener noreferrer" itemprop="url">
+                                    <span>Ver na Loja</span>
+                                    <span aria-hidden="true">🛒</span>
+                                </a>
                             {% endif %}
                         </div>
-
-                        {% if loja == "amazon" %}
-                            <a href="{{ produto[3] }}" target="_blank" class="botao-amazon">Ver na Amazon 🛒</a>
-                        {% elif loja == "magalu" %}
-                            <a href="{{ produto[3] }}" target="_blank" class="botao-magalu">Ver no Magalu 🛒</a>
-                        {% endif %}
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <div class="sem-produtos">
-            <h2>😕 Nenhum produto encontrado</h2>
-            <p>Execute o crawler localmente e faça deploy do banco!</p>
-        </div>
-    {% endif %}
-
-    <footer>
-        <p>Links de afiliado: lordumungus-20 (Amazon) | lordumungus (Magalu)</p>
-        <p>© 2024 - Promoções Amazon e Magalu</p>
-    </footer>
-
-</div>
-
+                    </article>
+                {% endfor %}
+            </div>
+            
+            {% if total_paginas > 1 %}
+            <nav class="paginacao" aria-label="Navegação de páginas">
+                {% if pagina_atual > 1 %}
+                    <a href="?pagina=1" class="pagina-link" aria-label="Primeira página" title="Primeira página">«</a>
+                    <a href="?pagina={{ pagina_atual - 1 }}" class="pagina-link" aria-label="Página anterior" title="Página anterior">‹</a>
+                {% endif %}
+                
+                {% for num in range(1, total_paginas + 1) %}
+                    {% if num == pagina_atual %}
+                        <span class="pagina-link ativa" aria-current="page">{{ num }}</span>
+                    {% elif num >= pagina_atual - 2 and num <= pagina_atual + 2 %}
+                        <a href="?pagina={{ num }}" class="pagina-link" aria-label="Página {{ num }}">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if pagina_atual < total_paginas %}
+                    <a href="?pagina={{ pagina_atual + 1 }}" class="pagina-link" aria-label="Próxima página" title="Próxima página">›</a>
+                    <a href="?pagina={{ total_paginas }}" class="pagina-link" aria-label="Última página" title="Última página">»</a>
+                {% endif %}
+            </nav>
+            {% endif %}
+            
+        {% else %}
+            <div class="sem-produtos">
+                <h2>😕 Nenhum produto encontrado</h2>
+                <p>Execute o crawler localmente para ver as ofertas!</p>
+                <a href="/debug" class="botao-padrao">
+                    <span>Ver diagnóstico</span>
+                    <span aria-hidden="true">🔧</span>
+                </a>
+            </div>
+        {% endif %}
+        
+        <footer>
+            <p>Links de afiliado: <strong>lordumungus-20</strong> (Amazon) | <strong>lordumungus</strong> (Magalu)</p>
+            <p>© 2024 - Promoções Amazon e Magalu - Todos os direitos reservados</p>
+            <p style="font-size: 0.8em; opacity: 0.7;">Os preços podem variar conforme a loja</p>
+        </footer>
+    </div>
 </body>
 </html>
