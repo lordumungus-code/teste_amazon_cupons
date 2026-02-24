@@ -24,7 +24,7 @@ print(f"📁 CRAWLER: Salvando banco em: {DB_PATH}")
 def configurar_driver():
     """Configura o Chrome em modo stealth (sem abrir janela)"""
     options = Options()
-    options.add_argument("--headless=new")  # Modo invisível
+    options.add_argument("--headless=new")
     options.add_argument("--window-size=1920,1080")
     options.add_argument("--disable-blink-features=AutomationControlled")
     options.add_argument("--no-sandbox")
@@ -86,7 +86,6 @@ def extrair_preco_amazon(produto):
         try:
             elemento = produto.find_element(By.CSS_SELECTOR, seletor)
             preco_texto = elemento.text.strip()
-            # Remove R$ e pontos, mantém vírgula
             preco_texto = preco_texto.replace('R$', '').replace('.', '').strip()
             match = re.search(r'[\d,]+', preco_texto)
             if match:
@@ -120,7 +119,6 @@ def extrair_link_amazon(produto):
             link_elem = produto.find_element(By.CSS_SELECTOR, seletor)
             link = link_elem.get_attribute("href")
             if link and "amazon.com.br" in link:
-                # Remove parâmetros existentes e adiciona a tag
                 link = link.split('/ref=')[0].split('?')[0]
                 link += f"?tag={PARTNER_TAG_AMAZON}"
                 return link
@@ -132,20 +130,15 @@ def buscar_amazon(driver, keyword):
     """Busca produtos na Amazon para uma palavra-chave"""
     print(f"\n🟡 AMAZON - Buscando: {keyword}")
     
-    # Comportamento humano: delay aleatório
     time.sleep(random.uniform(2, 4))
     
     url = f"https://www.amazon.com.br/s?k={keyword}"
     driver.get(url)
     
-    # Aguarda carregar
     time.sleep(3)
-    
-    # Rola a página para carregar mais produtos
     driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
     time.sleep(2)
     
-    # Encontra os produtos
     produtos = driver.find_elements(By.CSS_SELECTOR, "[data-component-type='s-search-result']")
     if not produtos:
         produtos = driver.find_elements(By.CSS_SELECTOR, ".s-result-item")
@@ -155,7 +148,7 @@ def buscar_amazon(driver, keyword):
     resultados = []
     contador = 0
     
-    for produto in produtos[:12]:  # Pega até 12 produtos por busca
+    for produto in produtos[:12]:
         try:
             nome = extrair_nome_amazon(produto)
             if not nome:
@@ -177,30 +170,91 @@ def buscar_amazon(driver, keyword):
         
         time.sleep(0.3)
     
-    print(f"  → Extraídos {contador} produtos da Amazon")
     return resultados
 
-# ==================== ATUALIZAR BANCO ====================
-def criar_tabela():
-    """Cria a tabela se não existir"""
+# ==================== VERIFICAR E CORRIGIR BANCO ====================
+def verificar_estrutura_banco():
+    """Verifica se a tabela tem a coluna 'loja' e adiciona se necessário"""
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS produtos (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nome TEXT,
-        preco TEXT,
-        imagem TEXT,
-        link TEXT,
-        loja TEXT,
-        data_coleta TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-    """)
+    # Verifica se tabela existe
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='produtos'")
+    if not cursor.fetchone():
+        # Tabela não existe, criar nova
+        cursor.execute("""
+        CREATE TABLE produtos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nome TEXT,
+            preco TEXT,
+            imagem TEXT,
+            link TEXT,
+            loja TEXT,
+            data_coleta TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+        """)
+        print("✅ Tabela 'produtos' criada com sucesso!")
+        conn.commit()
+        conn.close()
+        return
+    
+    # Verifica colunas existentes
+    cursor.execute("PRAGMA table_info(produtos)")
+    colunas = cursor.fetchall()
+    colunas_nomes = [col[1] for col in colunas]
+    
+    print("\n📋 Verificando estrutura do banco...")
+    print(f"   Colunas encontradas: {', '.join(colunas_nomes)}")
+    
+    # Adiciona coluna 'loja' se não existir
+    if 'loja' not in colunas_nomes:
+        print("   ⚠️ Coluna 'loja' não encontrada. Adicionando...")
+        
+        try:
+            # Cria tabela temporária
+            cursor.execute("""
+            CREATE TABLE produtos_temp (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nome TEXT,
+                preco TEXT,
+                imagem TEXT,
+                link TEXT,
+                loja TEXT,
+                data_coleta TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            """)
+            
+            # Copia dados existentes
+            # Verifica quais colunas existem para fazer a cópia correta
+            colunas_existentes = [c for c in colunas_nomes if c != 'id']
+            colunas_insert = ', '.join(colunas_existentes)
+            
+            if colunas_existentes:
+                cursor.execute(f"""
+                INSERT INTO produtos_temp (id, {colunas_insert}, loja)
+                SELECT id, {colunas_insert}, 'Amazon' FROM produtos
+                """)
+            else:
+                cursor.execute("""
+                INSERT INTO produtos_temp (id, loja)
+                SELECT id, 'Amazon' FROM produtos
+                """)
+            
+            # Remove tabela antiga e renomeia a nova
+            cursor.execute("DROP TABLE produtos")
+            cursor.execute("ALTER TABLE produtos_temp RENAME TO produtos")
+            
+            print("   ✅ Coluna 'loja' adicionada com sucesso!")
+            print("   ✅ Todos os produtos marcados como 'Amazon'")
+            
+        except Exception as e:
+            print(f"   ❌ Erro ao adicionar coluna: {e}")
+            cursor.execute("DROP TABLE IF EXISTS produtos_temp")
+    else:
+        print("   ✅ Coluna 'loja' já existe")
     
     conn.commit()
     conn.close()
-    print("✅ Tabela 'produtos' verificada/criada")
 
 def contar_produtos():
     """Conta quantos produtos existem no banco"""
@@ -215,10 +269,13 @@ def contar_produtos():
         return 0
 
 def atualizar_banco(resultados):
-    """Salva os resultados no banco de dados (substitui os antigos)"""
+    """Salva os resultados no banco de dados"""
     if not resultados:
         print("❌ Nenhum resultado para salvar!")
         return
+    
+    # Primeiro verifica/ajusta a estrutura do banco
+    verificar_estrutura_banco()
     
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
@@ -226,7 +283,7 @@ def atualizar_banco(resultados):
     # Conta antes de limpar
     antes = contar_produtos()
     
-    # Limpa produtos antigos (para ter sempre dados frescos)
+    # Limpa produtos antigos
     cursor.execute("DELETE FROM produtos")
     
     # Insere os novos produtos
@@ -242,10 +299,16 @@ def atualizar_banco(resultados):
     
     # Verifica quantos produtos foram salvos
     depois = contar_produtos()
+    
+    # Mostra estatísticas
+    cursor.execute("SELECT loja, COUNT(*) FROM produtos GROUP BY loja")
+    stats = cursor.fetchall()
     conn.close()
     
     print(f"\n✅ {depois} produtos salvos com sucesso!")
     print(f"   (Antes: {antes} produtos)")
+    for loja, qtd in stats:
+        print(f"   • {loja}: {qtd} produtos")
 
 # ==================== MAIN ====================
 def main():
@@ -256,8 +319,9 @@ def main():
     print(f"📦 Palavras-chave: {', '.join(KEYWORDS)}")
     print()
     
-    # Cria a tabela
-    criar_tabela()
+    # Verifica/corrige estrutura do banco antes de começar
+    if os.path.exists(DB_PATH):
+        verificar_estrutura_banco()
     
     driver = configurar_driver()
     todos_produtos = []
@@ -268,13 +332,11 @@ def main():
             print(f"🔎 PALAVRA-CHAVE: {keyword.upper()}")
             print(f"{'='*60}")
             
-            # Busca na Amazon
             produtos_amazon = buscar_amazon(driver, keyword)
             todos_produtos.extend(produtos_amazon)
             
             print(f"\n📊 Parcial: {len(todos_produtos)} produtos")
             
-            # Limite de 48 produtos no total
             if len(todos_produtos) >= 48:
                 print("\n🛑 Atingido limite de 48 produtos")
                 break
@@ -291,7 +353,6 @@ def main():
             driver.quit()
             return
         
-        # Salva no banco
         atualizar_banco(todos_produtos)
         
     except Exception as e:
@@ -300,6 +361,5 @@ def main():
         driver.quit()
         print("\n👋 Crawler encerrado")
 
-# ==================== EXECUTAR ====================
 if __name__ == "__main__":
     main()
