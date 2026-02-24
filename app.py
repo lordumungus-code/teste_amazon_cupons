@@ -28,29 +28,57 @@ def contar_produtos(caminho):
         return 0
 
 def get_db_path():
-    """Decide qual banco de dados usar"""
+    """Decide qual banco de dados usar - PRIORIDADE PARA O REPOSITÓRIO"""
+    
+    print("\n" + "="*50)
+    print("🔍 VERIFICANDO BANCOS DE DADOS")
+    print("="*50)
+    
+    # Verifica banco do repositório
+    if os.path.exists(BANCO_REPOSITORIO):
+        count_repositorio = contar_produtos(BANCO_REPOSITORIO)
+        print(f"📦 REPOSITÓRIO: {BANCO_REPOSITORIO}")
+        print(f"   → {count_repositorio} produtos")
+    else:
+        count_repositorio = 0
+        print(f"❌ REPOSITÓRIO: {BANCO_REPOSITORIO} (não existe)")
+    
+    # Verifica banco do volume
     if BANCO_VOLUME and os.path.exists(BANCO_VOLUME):
         count_volume = contar_produtos(BANCO_VOLUME)
-        
-        if os.path.exists(BANCO_REPOSITORIO):
-            count_repositorio = contar_produtos(BANCO_REPOSITORIO)
-            
-            print(f"📊 Comparação: Volume={count_volume} produtos, Repositório={count_repositorio} produtos")
-            
-            if count_repositorio > count_volume:
-                print(f"📋 Repositório tem mais produtos. Copiando para o volume...")
-                shutil.copy2(BANCO_REPOSITORIO, BANCO_VOLUME)
-                return BANCO_VOLUME
-            else:
-                return BANCO_VOLUME
-        else:
-            return BANCO_VOLUME
+        print(f"💾 VOLUME: {BANCO_VOLUME}")
+        print(f"   → {count_volume} produtos")
     else:
+        count_volume = 0
+        print(f"❌ VOLUME: {BANCO_VOLUME} (não existe)")
+    
+    print("-"*50)
+    
+    # DECISÃO: Priorizar o banco do repositório
+    if os.path.exists(BANCO_REPOSITORIO):
+        print(f"✅ ESCOLHIDO: REPOSITÓRIO ({count_repositorio} produtos)")
+        print("="*50 + "\n")
         return BANCO_REPOSITORIO
+    elif BANCO_VOLUME and os.path.exists(BANCO_VOLUME):
+        print(f"✅ ESCOLHIDO: VOLUME ({count_volume} produtos)")
+        print("="*50 + "\n")
+        return BANCO_VOLUME
+    else:
+        print("❌ NENHUM BANCO ENCONTRADO!")
+        print("="*50 + "\n")
+        return BANCO_REPOSITORIO
+
+# Força usar o banco do repositório (solução alternativa)
+# BANCO_REPOSITORIO_TEMP = os.path.join(BASE_DIR, 'produtos.db')
+# if os.path.exists(BANCO_REPOSITORIO_TEMP):
+#     DB_PATH = BANCO_REPOSITORIO_TEMP
+# else:
+#     DB_PATH = get_db_path()
 
 DB_PATH = get_db_path()
 count_final = contar_produtos(DB_PATH)
-print(f"✅ Usando banco: {DB_PATH} com {count_final} produtos")
+print(f"✅ BANCO EM USO: {DB_PATH} com {count_final} produtos")
+print()
 
 PRODUTOS_POR_PAGINA = 12
 
@@ -171,6 +199,7 @@ def verificar_banco():
         cursor = conn.cursor()
         
         html = "<h1>🔍 Diagnóstico do Banco de Dados</h1>"
+        html += f"<p><strong>Banco em uso:</strong> {DB_PATH}</p>"
         
         cursor.execute("PRAGMA table_info(produtos)")
         colunas = cursor.fetchall()
@@ -203,6 +232,28 @@ def verificar_banco():
         return html
     except Exception as e:
         return f"<h1>Erro</h1><p>{e}</p>"
+
+@app.route("/forcar-repositorio")
+def forcar_repositorio():
+    """Força o uso do banco do repositório"""
+    global DB_PATH
+    if os.path.exists(BANCO_REPOSITORIO):
+        DB_PATH = BANCO_REPOSITORIO
+        count = contar_produtos(DB_PATH)
+        return f"✅ Banco alterado para REPOSITÓRIO: {DB_PATH} com {count} produtos<br><br><a href='/'>Voltar</a>"
+    else:
+        return f"❌ Banco do repositório não encontrado!"
+
+@app.route("/forcar-volume")
+def forcar_volume():
+    """Força o uso do banco do volume"""
+    global DB_PATH
+    if BANCO_VOLUME and os.path.exists(BANCO_VOLUME):
+        DB_PATH = BANCO_VOLUME
+        count = contar_produtos(DB_PATH)
+        return f"✅ Banco alterado para VOLUME: {DB_PATH} com {count} produtos<br><br><a href='/'>Voltar</a>"
+    else:
+        return f"❌ Banco do volume não encontrado!"
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
