@@ -12,7 +12,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 # Configurações
 PARTNER_TAG_AMAZON = "lordumungus-20"
-KEYWORDS = ["bebe", "bebê", "fraldas", "mamadeira", "carrinho de bebe", "brinquedos bebe"]
+KEYWORDS = ["bebe", "bebê", "fraldas", "mamadeira", "carrinho de bebe", "brinquedos bebe","bebe conforto", "bebê conforto"]
 LIMITE_PRODUTOS = 100  # ← ALTERADO PARA 100
 DB_PATH = 'produtos.db'
 
