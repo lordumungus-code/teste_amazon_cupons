@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <title>🍼 Promoções para Bebês | Amazon & Magalu</title>
+    <title>🍼 Promoções Amazon para Bebês</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <meta name="description" content="As melhores ofertas para bebês da Amazon e Magalu em um só lugar">
+    <meta name="description" content="As melhores ofertas para bebês da Amazon em um só lugar">
     <meta name="theme-color" content="#667eea">
     
     <style>
@@ -21,8 +21,6 @@
             --secondary: #764ba2;
             --amazon: #FFD814;
             --amazon-dark: #F7CA00;
-            --magalu: #00A1FC;
-            --magalu-dark: #0088CC;
             --success: #2ecc71;
             --text-dark: #333;
             --text-light: #666;
@@ -43,7 +41,6 @@
             margin: 0 auto;
         }
 
-        /* UTILITÁRIOS */
         .sr-only {
             position: absolute;
             width: 1px;
@@ -55,18 +52,13 @@
             border: 0;
         }
 
-        /* HEADER MELHORADO */
+        /* HEADER */
         header {
             background: white;
             padding: clamp(15px, 3vw, 25px);
             border-radius: 20px;
             margin-bottom: clamp(15px, 3vw, 25px);
             box-shadow: var(--shadow);
-            transition: box-shadow 0.3s ease;
-        }
-
-        header:hover {
-            box-shadow: var(--shadow-hover);
         }
 
         h1 {
@@ -98,14 +90,12 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 12px;
-            border: 1px solid rgba(0,0,0,0.05);
         }
 
         .stats-info {
             display: flex;
             align-items: center;
             gap: 10px;
-            flex-wrap: wrap;
         }
 
         .stats-icon {
@@ -127,7 +117,6 @@
             font-weight: 600;
             font-size: 0.9em;
             white-space: nowrap;
-            box-shadow: 0 2px 5px rgba(102,126,234,0.3);
         }
 
         /* GRADE DE PRODUTOS */
@@ -150,19 +139,16 @@
             }
         }
 
-        /* CARD DE PRODUTO MELHORADO */
+        /* CARD DE PRODUTO */
         .produto {
             background: white;
             border-radius: 16px;
             overflow: hidden;
             box-shadow: 0 3px 12px rgba(0,0,0,0.08);
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.25s ease;
             display: flex;
             flex-direction: column;
             height: 100%;
-            position: relative;
-            border: 1px solid rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
         }
 
         .produto:hover {
@@ -170,31 +156,14 @@
             box-shadow: 0 15px 30px rgba(0,0,0,0.15);
         }
 
-        .produto:active {
-            transform: translateY(-2px);
-        }
-
-        /* IMAGEM COM OVERLAY */
+        /* IMAGEM */
         .produto-imagem {
-            position: relative;
             height: 200px;
             padding: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
             background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
-            overflow: hidden;
-        }
-
-        .produto-imagem::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.02) 100%);
-            pointer-events: none;
         }
 
         .produto-imagem img {
@@ -204,8 +173,6 @@
             height: auto;
             object-fit: contain;
             transition: transform 0.3s ease;
-            position: relative;
-            z-index: 1;
         }
 
         .produto:hover .produto-imagem img {
@@ -220,8 +187,8 @@
             background: white;
         }
 
-        /* BADGE DA LOJA MELHORADA */
-        .loja-badge {
+        /* BADGE DA AMAZON (FIXA) */
+        .badge-amazon {
             display: inline-flex;
             align-items: center;
             gap: 4px;
@@ -231,25 +198,9 @@
             font-weight: 600;
             margin-bottom: 12px;
             width: fit-content;
-            letter-spacing: 0.3px;
-            text-transform: uppercase;
-        }
-
-        .loja-amazon {
             background: var(--amazon);
             color: #000;
             border: 1px solid var(--amazon-dark);
-        }
-
-        .loja-magalu {
-            background: var(--magalu);
-            color: white;
-            border: 1px solid var(--magalu-dark);
-        }
-
-        .loja-outra {
-            background: #6c757d;
-            color: white;
         }
 
         .produto-titulo {
@@ -265,7 +216,7 @@
             font-weight: 500;
         }
 
-        /* PREÇO COM ANIMAÇÃO */
+        /* PREÇO */
         .produto-preco {
             font-size: clamp(1.4em, 4vw, 1.8em);
             font-weight: 800;
@@ -301,8 +252,8 @@
             margin-top: 4px;
         }
 
-        /* BOTÕES MELHORADOS */
-        .botao-amazon, .botao-magalu, .botao-padrao {
+        /* BOTÃO AMAZON */
+        .botao-amazon {
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -314,18 +265,10 @@
             font-weight: 600;
             margin-top: auto;
             transition: all 0.2s ease;
-            border: none;
-            cursor: pointer;
-            font-size: 0.95em;
-            letter-spacing: 0.3px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .botao-amazon {
             background: var(--amazon);
             color: #000;
             border: 1px solid var(--amazon-dark);
+            font-size: 0.95em;
         }
 
         .botao-amazon:hover {
@@ -333,31 +276,11 @@
             transform: scale(1.02);
         }
 
-        .botao-magalu {
-            background: var(--magalu);
-            color: white;
-            border: 1px solid var(--magalu-dark);
-        }
-
-        .botao-magalu:hover {
-            background: var(--magalu-dark);
-            transform: scale(1.02);
-        }
-
-        .botao-padrao {
-            background: var(--primary);
-            color: white;
-        }
-
-        .botao-padrao:hover {
-            background: var(--primary-dark);
-        }
-
-        .botao-amazon:active, .botao-magalu:active, .botao-padrao:active {
+        .botao-amazon:active {
             transform: scale(0.98);
         }
 
-        /* PAGINAÇÃO MELHORADA */
+        /* PAGINAÇÃO */
         .paginacao {
             display: flex;
             justify-content: center;
@@ -379,26 +302,19 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             min-width: 42px;
             text-align: center;
-            border: 1px solid transparent;
         }
 
         .pagina-link:hover {
             background: var(--primary);
             color: white;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102,126,234,0.3);
         }
 
         .pagina-link.ativa {
             background: var(--primary);
             color: white;
             font-weight: 700;
-            border-color: var(--primary-dark);
             cursor: default;
-        }
-
-        .pagina-link.ativa:hover {
-            transform: none;
         }
 
         @media (max-width: 480px) {
@@ -431,7 +347,7 @@
             font-size: 1.1em;
         }
 
-        .sem-produtos .botao-padrao {
+        .sem-produtos .botao-amazon {
             display: inline-flex;
             padding: 14px 35px;
         }
@@ -467,38 +383,14 @@
             animation: fadeIn 0.3s ease-out;
         }
 
-        /* MELHORIAS PARA TOQUE */
         @media (max-width: 768px) {
-            .botao-amazon, .botao-magalu, .botao-padrao {
+            .botao-amazon {
                 padding: 16px 20px;
                 font-size: 1em;
             }
 
             .pagina-link {
                 padding: 12px 15px;
-            }
-
-            .produto:active {
-                background: #f8f9fa;
-            }
-        }
-
-        /* SKELETON LOADING */
-        .skeleton {
-            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-            background-size: 200% 100%;
-            animation: loading 1.5s infinite;
-        }
-
-        @keyframes loading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-
-        /* MODO ESCURO (OPCIONAL) */
-        @media (prefers-color-scheme: dark) {
-            body {
-                background: linear-gradient(135deg, #4a5fc1 0%, #5a3d8c 100%);
             }
         }
     </style>
@@ -507,14 +399,12 @@
     <div class="container">
         <header>
             <h1>
-                <span aria-hidden="true">🍼</span> 
-                Promoções para Bebês
-                <span class="sr-only">-</span>
-                <small style="font-size: 0.6em; color: var(--text-light);">Amazon & Magalu</small>
+                <span aria-hidden="true">🛒</span> 
+                Promoções Amazon para Bebês
             </h1>
             <p class="subtitle">
                 <span aria-hidden="true">✨</span>
-                As melhores ofertas das duas lojas em um só lugar
+                As melhores ofertas da Amazon em um só lugar
             </p>
             
             <div class="stats">
@@ -522,50 +412,39 @@
                     <span class="stats-icon" aria-hidden="true">📦</span>
                     <span><strong>{{ total_produtos }}</strong> produtos encontrados</span>
                 </div>
+                {% if total_paginas > 1 %}
                 <span class="total-produtos" aria-label="Página {{ pagina_atual }} de {{ total_paginas }}">
                     Página {{ pagina_atual }}/{{ total_paginas }}
                 </span>
+                {% endif %}
             </div>
         </header>
 
-        {% if produtos %}
+        {% if produtos and produtos|length > 0 %}
             <div class="produtos-grid">
                 {% for produto in produtos %}
-                    <article class="produto" itemscope itemtype="https://schema.org/Product">
+                    <article class="produto">
                         <div class="produto-imagem">
                             <img src="{{ produto[2] }}" 
                                  alt="{{ produto[0] }}" 
                                  loading="lazy"
-                                 itemprop="image"
-                                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\' viewBox=\'0 0 200 200\'%3E%3Crect width=\'200\' height=\'200\' fill=\'%23f0f0f0\'/%3E%3Ctext x=\'50\' y=\'115\' font-family=\'Arial\' font-size=\'14\' fill=\'%23999\'%3EImagem%3C/text%3E%3Ctext x=\'45\' y=\'135\' font-family=\'Arial\' font-size=\'14\' fill=\'%23999\'%3Eindisponível%3C/text%3E%3C/svg%3E'">
+                                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\' viewBox=\'0 0 200 200\'%3E%3Crect width=\'200\' height=\'200\' fill=\'%23f0f0f0\'/%3E%3Ctext x=\'40\' y=\'115\' font-family=\'Arial\' font-size=\'14\' fill=\'%23999\'%3EImagem%3C/text%3E%3Ctext x=\'35\' y=\'135\' font-family=\'Arial\' font-size=\'14\' fill=\'%23999\'%3Eindisponível%3C/text%3E%3C/svg%3E'">
                         </div>
                         
                         <div class="produto-info">
-                            {% set loja = produto[4]|lower %}
+                            <span class="badge-amazon">
+                                <span aria-hidden="true">🟡</span> Amazon
+                            </span>
                             
-                            {% if loja == "amazon" %}
-                                <span class="loja-badge loja-amazon">
-                                    <span aria-hidden="true">🟡</span> Amazon
-                                </span>
-                            {% elif loja == "magalu" %}
-                                <span class="loja-badge loja-magalu">
-                                    <span aria-hidden="true">🔵</span> Magalu
-                                </span>
-                            {% else %}
-                                <span class="loja-badge loja-outra">
-                                    <span aria-hidden="true">⚪</span> {{ produto[4] }}
-                                </span>
-                            {% endif %}
+                            <h3 class="produto-titulo">{{ produto[0] }}</h3>
                             
-                            <h3 class="produto-titulo" itemprop="name">{{ produto[0] }}</h3>
-                            
-                            <div class="produto-preco" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
-                                {% if produto[1] == "Ver preço" or produto[1] == "Preço indisponível" %}
+                            <div class="produto-preco">
+                                {% if produto[1] == "Preço indisponível" or produto[1] == "Ver preço" %}
                                     <span class="preco-indisponivel">{{ produto[1] }}</span>
                                 {% else %}
                                     <div class="preco-valor">
                                         <span class="simbolo">R$</span>
-                                        <span itemprop="price">
+                                        <span>
                                             {% if ',' in produto[1] %}
                                                 {{ produto[1] }}
                                             {% elif '.' in produto[1] %}
@@ -575,27 +454,14 @@
                                             {% endif %}
                                         </span>
                                     </div>
-                                    <meta itemprop="priceCurrency" content="BRL">
-                                    <span class="preco-parcelamento">à vista no PIX ou boleto</span>
+                                    <span class="preco-parcelamento">à vista no PIX</span>
                                 {% endif %}
                             </div>
                             
-                            {% if loja == "amazon" %}
-                                <a href="{{ produto[3] }}" target="_blank" class="botao-amazon" rel="noopener noreferrer" itemprop="url">
-                                    <span>Ver na Amazon</span>
-                                    <span aria-hidden="true">🛒</span>
-                                </a>
-                            {% elif loja == "magalu" %}
-                                <a href="{{ produto[3] }}" target="_blank" class="botao-magalu" rel="noopener noreferrer" itemprop="url">
-                                    <span>Ver no Magalu</span>
-                                    <span aria-hidden="true">🛒</span>
-                                </a>
-                            {% else %}
-                                <a href="{{ produto[3] }}" target="_blank" class="botao-padrao" rel="noopener noreferrer" itemprop="url">
-                                    <span>Ver na Loja</span>
-                                    <span aria-hidden="true">🛒</span>
-                                </a>
-                            {% endif %}
+                            <a href="{{ produto[3] }}" target="_blank" class="botao-amazon" rel="noopener noreferrer">
+                                <span>Ver na Amazon</span>
+                                <span aria-hidden="true">🛒</span>
+                            </a>
                         </div>
                     </article>
                 {% endfor %}
@@ -604,8 +470,8 @@
             {% if total_paginas > 1 %}
             <nav class="paginacao" aria-label="Navegação de páginas">
                 {% if pagina_atual > 1 %}
-                    <a href="?pagina=1" class="pagina-link" aria-label="Primeira página" title="Primeira página">«</a>
-                    <a href="?pagina={{ pagina_atual - 1 }}" class="pagina-link" aria-label="Página anterior" title="Página anterior">‹</a>
+                    <a href="?pagina=1" class="pagina-link" aria-label="Primeira página">«</a>
+                    <a href="?pagina={{ pagina_atual - 1 }}" class="pagina-link" aria-label="Página anterior">‹</a>
                 {% endif %}
                 
                 {% for num in range(1, total_paginas + 1) %}
@@ -617,8 +483,8 @@
                 {% endfor %}
                 
                 {% if pagina_atual < total_paginas %}
-                    <a href="?pagina={{ pagina_atual + 1 }}" class="pagina-link" aria-label="Próxima página" title="Próxima página">›</a>
-                    <a href="?pagina={{ total_paginas }}" class="pagina-link" aria-label="Última página" title="Última página">»</a>
+                    <a href="?pagina={{ pagina_atual + 1 }}" class="pagina-link" aria-label="Próxima página">›</a>
+                    <a href="?pagina={{ total_paginas }}" class="pagina-link" aria-label="Última página">»</a>
                 {% endif %}
             </nav>
             {% endif %}
@@ -626,8 +492,8 @@
         {% else %}
             <div class="sem-produtos">
                 <h2>😕 Nenhum produto encontrado</h2>
-                <p>Execute o crawler localmente para ver as ofertas!</p>
-                <a href="/debug" class="botao-padrao">
+                <p>Os produtos aparecerão aqui após a execução do crawler!</p>
+                <a href="/debug" class="botao-amazon">
                     <span>Ver diagnóstico</span>
                     <span aria-hidden="true">🔧</span>
                 </a>
@@ -635,9 +501,9 @@
         {% endif %}
         
         <footer>
-            <p>Links de afiliado: <strong>lordumungus-20</strong> (Amazon) | <strong>lordumungus</strong> (Magalu)</p>
-            <p>© 2024 - Promoções Amazon e Magalu - Todos os direitos reservados</p>
-            <p style="font-size: 0.8em; opacity: 0.7;">Os preços podem variar conforme a loja</p>
+            <p>Link de afiliado: <strong>lordumungus-20</strong> (Amazon)</p>
+            <p>© 2024 - Promoções Amazon para Bebês</p>
+            <p style="font-size: 0.8em; opacity: 0.7;">Preços e estoque sujeitos a alteração</p>
         </footer>
     </div>
 </body>

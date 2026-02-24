@@ -29,7 +29,6 @@ def contar_produtos(caminho):
 
 def get_db_path():
     """Decide qual banco de dados usar"""
-    # Se tem volume no Railway
     if BANCO_VOLUME and os.path.exists(BANCO_VOLUME):
         count_volume = contar_produtos(BANCO_VOLUME)
         
@@ -39,24 +38,17 @@ def get_db_path():
             print(f"📊 Comparação: Volume={count_volume} produtos, Repositório={count_repositorio} produtos")
             
             if count_repositorio > count_volume:
-                # Repositório tem mais produtos! Copia para o volume
                 print(f"📋 Repositório tem mais produtos. Copiando para o volume...")
                 shutil.copy2(BANCO_REPOSITORIO, BANCO_VOLUME)
                 return BANCO_VOLUME
             else:
-                # Volume já tem o banco mais atualizado
                 return BANCO_VOLUME
         else:
-            # Só tem banco no volume
             return BANCO_VOLUME
     else:
-        # Não tem volume, usa banco do repositório
         return BANCO_REPOSITORIO
 
-# Define o banco a ser usado
 DB_PATH = get_db_path()
-
-# Verificação final
 count_final = contar_produtos(DB_PATH)
 print(f"✅ Usando banco: {DB_PATH} com {count_final} produtos")
 
@@ -69,10 +61,9 @@ def index():
     
     try:
         conn = sqlite3.connect(DB_PATH)
-        conn.row_factory = sqlite3.Row  # Permite acesso por nome das colunas
+        conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         
-        # Verifica se tabela existe
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='produtos'")
         if not cursor.fetchone():
             return "Tabela 'produtos' não encontrada. Execute o crawler primeiro!"
@@ -83,9 +74,9 @@ def index():
         if total_produtos == 0:
             return render_template("index.html", produtos=None, total_produtos=0)
         
-        # Consulta com todos os campos necessários
+        # Consulta SEM a coluna loja (apenas 4 campos)
         cursor.execute("""
-            SELECT nome, preco, imagem, link, loja 
+            SELECT nome, preco, imagem, link 
             FROM produtos 
             ORDER BY id DESC 
             LIMIT ? OFFSET ?
@@ -142,12 +133,10 @@ def debug():
     info.append("")
     info.append(f"✅ BANCO EM USO: {DB_PATH}")
     
-    # Informações sobre os produtos
     try:
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
         
-        # Estrutura da tabela
         cursor.execute("PRAGMA table_info(produtos)")
         colunas = cursor.fetchall()
         info.append("")
@@ -155,20 +144,18 @@ def debug():
         for col in colunas:
             info.append(f"  - {col[1]} ({col[2]})")
         
-        # Total de produtos
         cursor.execute("SELECT COUNT(*) FROM produtos")
         total = cursor.fetchone()[0]
         info.append(f"")
         info.append(f"📊 Total de produtos no banco: {total}")
         
-        # Primeiros produtos
         if total > 0:
-            cursor.execute("SELECT nome, preco, loja FROM produtos LIMIT 5")
+            cursor.execute("SELECT nome, preco FROM produtos LIMIT 5")
             primeiros = cursor.fetchall()
             info.append("")
             info.append("🔍 Primeiros 5 produtos:")
             for i, p in enumerate(primeiros, 1):
-                info.append(f"  {i}. {p[0][:50]}... | {p[2]} | R$ {p[1]}")
+                info.append(f"  {i}. {p[0][:50]}... - R$ {p[1]}")
         
         conn.close()
     except Exception as e:
@@ -185,7 +172,6 @@ def verificar_banco():
         
         html = "<h1>🔍 Diagnóstico do Banco de Dados</h1>"
         
-        # Estrutura da tabela
         cursor.execute("PRAGMA table_info(produtos)")
         colunas = cursor.fetchall()
         
@@ -196,28 +182,18 @@ def verificar_banco():
             html += f"<tr><td>{col[1]}</td><td>{col[2]}</td><td>{'SIM' if col[3] else 'NÃO'}</td></tr>"
         html += "</table>"
         
-        # Total de produtos
         cursor.execute("SELECT COUNT(*) FROM produtos")
         total = cursor.fetchone()[0]
         html += f"<h2>📦 Total de produtos: <strong>{total}</strong></h2>"
         
-        # Distribuição por loja
-        cursor.execute("SELECT loja, COUNT(*) FROM produtos GROUP BY loja")
-        lojas = cursor.fetchall()
-        html += "<h2>🏷️ Produtos por Loja</h2><ul>"
-        for loja, qtd in lojas:
-            html += f"<li><strong>{loja}</strong>: {qtd} produtos</li>"
-        html += "</ul>"
-        
-        # Últimos produtos adicionados
-        cursor.execute("SELECT id, nome, preco, loja, data_coleta FROM produtos ORDER BY id DESC LIMIT 5")
+        cursor.execute("SELECT id, nome, preco FROM produtos ORDER BY id DESC LIMIT 10")
         ultimos = cursor.fetchall()
         
-        html += "<h2>🆕 Últimos 5 Produtos</h2>"
+        html += "<h2>🆕 Últimos 10 Produtos</h2>"
         html += "<table border='1' cellpadding='8' cellspacing='0' style='border-collapse: collapse; width: 100%;'>"
-        html += "<tr style='background: #f0f0f0;'><th>ID</th><th>Nome</th><th>Preço</th><th>Loja</th><th>Data</th></tr>"
+        html += "<tr style='background: #f0f0f0;'><th>ID</th><th>Nome</th><th>Preço</th></tr>"
         for p in ultimos:
-            html += f"<tr><td>{p[0]}</td><td>{p[1][:60]}...</td><td>R$ {p[2]}</td><td>{p[3]}</td><td>{p[4]}</td></tr>"
+            html += f"<tr><td>{p[0]}</td><td>{p[1][:60]}...</td><td>R$ {p[2]}</td></tr>"
         html += "</table>"
         
         conn.close()

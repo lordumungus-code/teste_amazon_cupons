@@ -7,8 +7,6 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
 # Tag de afiliado Amazon
@@ -22,7 +20,7 @@ DB_PATH = 'produtos.db'
 print(f"📁 CRAWLER: Salvando banco em: {DB_PATH}")
 
 def configurar_driver():
-    """Configura o Chrome em modo stealth (sem abrir janela)"""
+    """Configura o Chrome em modo stealth"""
     options = Options()
     options.add_argument("--headless=new")
     options.add_argument("--window-size=1920,1080")
@@ -161,7 +159,8 @@ def buscar_amazon(driver, keyword):
             if not link:
                 continue
             
-            resultados.append((nome, preco, imagem, link, "Amazon"))
+            # SEM a coluna loja - apenas 4 campos
+            resultados.append((nome, preco, imagem, link))
             contador += 1
             print(f"  ✓ {contador:2d}: {nome[:40]}... - R$ {preco}")
             
@@ -172,89 +171,25 @@ def buscar_amazon(driver, keyword):
     
     return resultados
 
-# ==================== VERIFICAR E CORRIGIR BANCO ====================
-def verificar_estrutura_banco():
-    """Verifica se a tabela tem a coluna 'loja' e adiciona se necessário"""
+def criar_tabela():
+    """Cria a tabela SEM a coluna loja"""
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     
-    # Verifica se tabela existe
-    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='produtos'")
-    if not cursor.fetchone():
-        # Tabela não existe, criar nova
-        cursor.execute("""
-        CREATE TABLE produtos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nome TEXT,
-            preco TEXT,
-            imagem TEXT,
-            link TEXT,
-            loja TEXT,
-            data_coleta TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-        """)
-        print("✅ Tabela 'produtos' criada com sucesso!")
-        conn.commit()
-        conn.close()
-        return
-    
-    # Verifica colunas existentes
-    cursor.execute("PRAGMA table_info(produtos)")
-    colunas = cursor.fetchall()
-    colunas_nomes = [col[1] for col in colunas]
-    
-    print("\n📋 Verificando estrutura do banco...")
-    print(f"   Colunas encontradas: {', '.join(colunas_nomes)}")
-    
-    # Adiciona coluna 'loja' se não existir
-    if 'loja' not in colunas_nomes:
-        print("   ⚠️ Coluna 'loja' não encontrada. Adicionando...")
-        
-        try:
-            # Cria tabela temporária
-            cursor.execute("""
-            CREATE TABLE produtos_temp (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                nome TEXT,
-                preco TEXT,
-                imagem TEXT,
-                link TEXT,
-                loja TEXT,
-                data_coleta TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-            """)
-            
-            # Copia dados existentes
-            # Verifica quais colunas existem para fazer a cópia correta
-            colunas_existentes = [c for c in colunas_nomes if c != 'id']
-            colunas_insert = ', '.join(colunas_existentes)
-            
-            if colunas_existentes:
-                cursor.execute(f"""
-                INSERT INTO produtos_temp (id, {colunas_insert}, loja)
-                SELECT id, {colunas_insert}, 'Amazon' FROM produtos
-                """)
-            else:
-                cursor.execute("""
-                INSERT INTO produtos_temp (id, loja)
-                SELECT id, 'Amazon' FROM produtos
-                """)
-            
-            # Remove tabela antiga e renomeia a nova
-            cursor.execute("DROP TABLE produtos")
-            cursor.execute("ALTER TABLE produtos_temp RENAME TO produtos")
-            
-            print("   ✅ Coluna 'loja' adicionada com sucesso!")
-            print("   ✅ Todos os produtos marcados como 'Amazon'")
-            
-        except Exception as e:
-            print(f"   ❌ Erro ao adicionar coluna: {e}")
-            cursor.execute("DROP TABLE IF EXISTS produtos_temp")
-    else:
-        print("   ✅ Coluna 'loja' já existe")
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS produtos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nome TEXT,
+        preco TEXT,
+        imagem TEXT,
+        link TEXT,
+        data_coleta TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
     
     conn.commit()
     conn.close()
+    print("✅ Tabela 'produtos' criada/verificada (sem coluna loja)")
 
 def contar_produtos():
     """Conta quantos produtos existem no banco"""
@@ -274,9 +209,6 @@ def atualizar_banco(resultados):
         print("❌ Nenhum resultado para salvar!")
         return
     
-    # Primeiro verifica/ajusta a estrutura do banco
-    verificar_estrutura_banco()
-    
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     
@@ -286,11 +218,11 @@ def atualizar_banco(resultados):
     # Limpa produtos antigos
     cursor.execute("DELETE FROM produtos")
     
-    # Insere os novos produtos
+    # Insere os novos produtos (apenas 4 campos)
     for i, produto in enumerate(resultados, 1):
         cursor.execute("""
-        INSERT INTO produtos (nome, preco, imagem, link, loja)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO produtos (nome, preco, imagem, link)
+        VALUES (?, ?, ?, ?)
         """, produto)
         if i % 10 == 0:
             print(f"  💾 Salvando... {i} produtos")
@@ -299,16 +231,10 @@ def atualizar_banco(resultados):
     
     # Verifica quantos produtos foram salvos
     depois = contar_produtos()
-    
-    # Mostra estatísticas
-    cursor.execute("SELECT loja, COUNT(*) FROM produtos GROUP BY loja")
-    stats = cursor.fetchall()
     conn.close()
     
     print(f"\n✅ {depois} produtos salvos com sucesso!")
     print(f"   (Antes: {antes} produtos)")
-    for loja, qtd in stats:
-        print(f"   • {loja}: {qtd} produtos")
 
 # ==================== MAIN ====================
 def main():
@@ -319,9 +245,13 @@ def main():
     print(f"📦 Palavras-chave: {', '.join(KEYWORDS)}")
     print()
     
-    # Verifica/corrige estrutura do banco antes de começar
+    # Remove banco antigo se existir (para garantir estrutura correta)
     if os.path.exists(DB_PATH):
-        verificar_estrutura_banco()
+        print("🗑️ Removendo banco antigo...")
+        os.remove(DB_PATH)
+    
+    # Cria nova tabela
+    criar_tabela()
     
     driver = configurar_driver()
     todos_produtos = []
