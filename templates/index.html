@@ -1,14 +1,21 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <title>🍼 Promoções Amazon para Bebês</title>
+    <title>🍼 BabyDeals | Promoções Amazon para Bebês</title>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="As melhores ofertas para bebês da Amazon em um só lugar">
-    <meta name="theme-color" content="#667eea">
+    <meta name="theme-color" content="#FFD814">
+    
+    <!-- Fontes modernas -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome para ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        /* RESET E VARIÁVEIS */
         * {
             margin: 0;
             padding: 0;
@@ -16,24 +23,31 @@
         }
 
         :root {
-            --primary: #667eea;
-            --primary-dark: #5a67d8;
-            --secondary: #764ba2;
-            --amazon: #FFD814;
-            --amazon-dark: #F7CA00;
+            --primary: #FFD814;
+            --primary-dark: #F7CA00;
+            --secondary: #232f3e;
+            --accent: #ff9900;
             --success: #2ecc71;
-            --text-dark: #333;
-            --text-light: #666;
+            --text-primary: #1a1a1a;
+            --text-secondary: #4a4a4a;
+            --text-light: #767676;
             --bg-light: #f8f9fa;
-            --shadow: 0 5px 15px rgba(0,0,0,0.1);
-            --shadow-hover: 0 8px 25px rgba(0,0,0,0.15);
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.05);
+            --shadow-md: 0 5px 15px rgba(0,0,0,0.08);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+            --shadow-hover: 0 15px 35px rgba(0,0,0,0.15);
+            --border-radius: 20px;
+            --border-radius-sm: 12px;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-gradient);
             min-height: 100vh;
-            padding: clamp(8px, 2vw, 20px);
+            padding: clamp(12px, 3vw, 24px);
+            color: var(--text-primary);
+            line-height: 1.5;
         }
 
         .container {
@@ -41,6 +55,7 @@
             margin: 0 auto;
         }
 
+        /* Utilitários */
         .sr-only {
             position: absolute;
             width: 1px;
@@ -48,330 +63,559 @@
             padding: 0;
             margin: -1px;
             overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            border: 0;
         }
 
-        /* HEADER */
-        header {
-            background: white;
-            padding: clamp(15px, 3vw, 25px);
-            border-radius: 20px;
-            margin-bottom: clamp(15px, 3vw, 25px);
-            box-shadow: var(--shadow);
+        /* Header Premium */
+        .header-premium {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            padding: clamp(20px, 4vw, 32px);
+            border-radius: var(--border-radius);
+            margin-bottom: clamp(20px, 3vw, 30px);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255,255,255,0.2);
+            position: relative;
+            overflow: hidden;
         }
 
-        h1 {
-            color: var(--text-dark);
-            font-size: clamp(1.3em, 4vw, 2.2em);
-            margin-bottom: 10px;
-            line-height: 1.3;
+        .header-premium::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+        }
+
+        .header-content {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .header-title {
             display: flex;
             align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .subtitle {
-            color: var(--text-light);
-            font-size: clamp(0.9em, 2.5vw, 1.1em);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .stats {
-            background: var(--bg-light);
-            padding: 15px;
-            border-radius: 15px;
-            margin-top: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
             gap: 12px;
+            flex-wrap: wrap;
         }
 
-        .stats-info {
+        .header-title h1 {
+            font-size: clamp(1.8em, 5vw, 2.8em);
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--secondary), #1a1a1a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .header-badge {
+            background: var(--primary);
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.9em;
+            color: var(--secondary);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-subtitle {
+            font-size: clamp(1em, 2.5vw, 1.2em);
+            color: var(--text-secondary);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            flex-wrap: wrap;
         }
 
-        .stats-icon {
+        .header-subtitle i {
+            color: var(--accent);
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: var(--bg-light);
+            padding: 16px 20px;
+            border-radius: var(--border-radius-sm);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: transform 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
             background: white;
-            width: 35px;
-            height: 35px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            font-size: 1.4em;
+            color: var(--secondary);
+            box-shadow: var(--shadow-sm);
         }
 
-        .total-produtos {
-            background: var(--primary);
-            color: white;
-            padding: 6px 16px;
-            border-radius: 30px;
-            font-weight: 600;
+        .stat-info h3 {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: var(--secondary);
+            line-height: 1.2;
+        }
+
+        .stat-info p {
+            color: var(--text-light);
             font-size: 0.9em;
-            white-space: nowrap;
+            font-weight: 500;
         }
 
-        /* GRADE DE PRODUTOS */
+        /* Grade de Produtos */
         .produtos-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: clamp(12px, 2vw, 20px);
-            margin-bottom: 30px;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: clamp(16px, 2.5vw, 24px);
+            margin-bottom: 40px;
         }
 
-        @media (max-width: 600px) {
-            .produtos-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (min-width: 601px) and (max-width: 900px) {
-            .produtos-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        /* CARD DE PRODUTO */
-        .produto {
+        /* Card de Produto */
+        .produto-card {
             background: white;
-            border-radius: 16px;
+            border-radius: var(--border-radius);
             overflow: hidden;
-            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
-            transition: all 0.25s ease;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
             height: 100%;
+            position: relative;
+            border: 1px solid rgba(0,0,0,0.05);
         }
 
-        .produto:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        .produto-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-hover);
         }
 
-        /* IMAGEM */
+        .produto-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .produto-card:hover::after {
+            opacity: 1;
+        }
+
+        /* Imagem do Produto */
         .produto-imagem {
-            height: 200px;
-            padding: 15px;
+            position: relative;
+            height: 220px;
+            padding: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%);
+            overflow: hidden;
         }
 
         .produto-imagem img {
             max-width: 100%;
-            max-height: 170px;
+            max-height: 180px;
             width: auto;
             height: auto;
             object-fit: contain;
-            transition: transform 0.3s ease;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1));
         }
 
-        .produto:hover .produto-imagem img {
-            transform: scale(1.05);
+        .produto-card:hover .produto-imagem img {
+            transform: scale(1.08) rotate(2deg);
+        }
+
+        .produto-tag {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: var(--primary);
+            padding: 6px 12px;
+            border-radius: 30px;
+            font-size: 0.75em;
+            font-weight: 600;
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            box-shadow: var(--shadow-sm);
+            z-index: 2;
         }
 
         .produto-info {
-            padding: 18px;
+            padding: 20px;
             flex-grow: 1;
             display: flex;
             flex-direction: column;
             background: white;
         }
 
-        /* BADGE DA AMAZON (FIXA) */
-        .badge-amazon {
-            display: inline-flex;
+        .produto-categoria {
+            font-size: 0.75em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-light);
+            margin-bottom: 8px;
+            display: flex;
             align-items: center;
             gap: 4px;
-            padding: 5px 12px;
-            border-radius: 30px;
-            font-size: 0.8em;
-            font-weight: 600;
-            margin-bottom: 12px;
-            width: fit-content;
-            background: var(--amazon);
-            color: #000;
-            border: 1px solid var(--amazon-dark);
         }
 
         .produto-titulo {
             font-size: 1.1em;
+            font-weight: 600;
             margin-bottom: 12px;
-            color: var(--text-dark);
+            color: var(--text-primary);
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
             min-height: 2.8em;
             line-height: 1.4;
-            font-weight: 500;
         }
 
-        /* PREÇO */
+        /* Preço */
         .produto-preco {
-            font-size: clamp(1.4em, 4vw, 1.8em);
-            font-weight: 800;
-            color: var(--success);
-            margin: 10px 0;
-            line-height: 1.2;
-            display: flex;
-            flex-direction: column;
+            margin: 15px 0 20px;
+            padding: 12px 0;
+            border-top: 1px solid rgba(0,0,0,0.05);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
         }
 
-        .preco-valor {
+        .preco-principal {
             display: flex;
             align-items: baseline;
             gap: 4px;
+            font-size: 1.8em;
+            font-weight: 800;
+            color: var(--success);
         }
 
-        .preco-valor .simbolo {
-            font-size: 0.7em;
+        .preco-simbolo {
+            font-size: 0.6em;
+            font-weight: 500;
             color: var(--text-light);
+        }
+
+        .preco-inteiro {
+            line-height: 1;
+        }
+
+        .preco-centavos {
+            font-size: 0.5em;
+            font-weight: 500;
+            color: var(--text-light);
+            align-self: flex-start;
+            margin-top: 4px;
+        }
+
+        .preco-parcelamento {
+            font-size: 0.85em;
+            color: var(--text-light);
+            margin-top: 6px;
+        }
+
+        .preco-parcelamento strong {
+            color: var(--success);
         }
 
         .preco-indisponivel {
             color: #999;
-            font-size: 0.7em;
-            font-weight: normal;
+            font-size: 1em;
             font-style: italic;
+            padding: 10px 0;
         }
 
-        .preco-parcelamento {
-            font-size: 0.5em;
-            color: var(--text-light);
-            font-weight: normal;
-            margin-top: 4px;
-        }
-
-        /* BOTÃO AMAZON */
-        .botao-amazon {
+        /* Botão */
+        .btn-amazon {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            padding: 14px 20px;
+            gap: 10px;
+            padding: 14px 24px;
+            background: var(--primary);
+            color: var(--secondary);
             text-decoration: none;
-            text-align: center;
             border-radius: 40px;
             font-weight: 600;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            border: 1px solid var(--primary-dark);
             margin-top: auto;
-            transition: all 0.2s ease;
-            background: var(--amazon);
-            color: #000;
-            border: 1px solid var(--amazon-dark);
-            font-size: 0.95em;
+            position: relative;
+            overflow: hidden;
         }
 
-        .botao-amazon:hover {
-            background: var(--amazon-dark);
+        .btn-amazon::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn-amazon:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-amazon:hover {
+            background: var(--primary-dark);
             transform: scale(1.02);
         }
 
-        .botao-amazon:active {
-            transform: scale(0.98);
+        .btn-amazon i {
+            font-size: 1.1em;
+            transition: transform 0.3s ease;
         }
 
-        /* PAGINAÇÃO */
+        .btn-amazon:hover i {
+            transform: translateX(4px);
+        }
+
+        /* Paginação */
         .paginacao {
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 8px;
-            margin: 35px 0 20px;
+            margin: 40px 0 30px;
             flex-wrap: wrap;
         }
 
-        .pagina-link {
+        .page-link {
             background: white;
-            color: var(--text-dark);
-            padding: 10px 15px;
+            color: var(--text-primary);
+            padding: 12px 18px;
             text-decoration: none;
-            border-radius: 10px;
+            border-radius: 12px;
             font-weight: 500;
             font-size: 0.95em;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            min-width: 42px;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-sm);
+            min-width: 48px;
             text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid transparent;
         }
 
-        .pagina-link:hover {
+        .page-link:hover {
             background: var(--primary);
-            color: white;
+            color: var(--secondary);
             transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary-dark);
         }
 
-        .pagina-link.ativa {
-            background: var(--primary);
+        .page-link.active {
+            background: var(--secondary);
             color: white;
             font-weight: 700;
+            border-color: var(--secondary);
             cursor: default;
         }
 
-        @media (max-width: 480px) {
-            .pagina-link {
-                padding: 8px 12px;
-                min-width: 38px;
-                font-size: 0.9em;
-            }
+        .page-link.active:hover {
+            transform: none;
         }
 
-        /* MENSAGEM SEM PRODUTOS */
-        .sem-produtos {
+        .page-dots {
+            color: white;
+            font-weight: 600;
+        }
+
+        /* Empty State */
+        .empty-state {
             text-align: center;
-            padding: 50px 25px;
+            padding: 60px 30px;
             background: white;
-            border-radius: 25px;
+            border-radius: var(--border-radius);
             margin: 30px 0;
-            box-shadow: var(--shadow);
+            box-shadow: var(--shadow-lg);
         }
 
-        .sem-produtos h2 {
-            color: var(--text-dark);
-            font-size: 1.5em;
-            margin-bottom: 15px;
-        }
-
-        .sem-produtos p {
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
             color: var(--text-light);
-            margin-bottom: 25px;
+        }
+
+        .empty-state h2 {
+            color: var(--text-primary);
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .empty-state p {
+            color: var(--text-secondary);
+            margin-bottom: 30px;
             font-size: 1.1em;
         }
 
-        .sem-produtos .botao-amazon {
+        .empty-state .btn-amazon {
             display: inline-flex;
-            padding: 14px 35px;
+            padding: 16px 40px;
         }
 
-        /* FOOTER */
-        footer {
+        /* Footer */
+        .footer-premium {
             text-align: center;
             color: white;
-            margin-top: 40px;
+            margin-top: 50px;
+            padding: 30px 0;
+            border-top: 1px solid rgba(255,255,255,0.15);
+            backdrop-filter: blur(5px);
+        }
+
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 0.95em;
             opacity: 0.9;
+            transition: opacity 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .footer-links a:hover {
+            opacity: 1;
+            text-decoration: underline;
+        }
+
+        .footer-copyright {
             font-size: 0.9em;
-            padding: 20px 0;
-            border-top: 1px solid rgba(255,255,255,0.2);
+            opacity: 0.8;
         }
 
-        footer p {
-            margin: 5px 0;
+        .footer-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.1);
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 0.8em;
         }
 
-        /* ANIMAÇÕES */
-        @keyframes fadeIn {
+        /* Loading Animation */
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+
+        .loading {
+            animation: shimmer 2s infinite;
+            background: linear-gradient(to right, #f0f0f0 4%, #e0e0e0 25%, #f0f0f0 36%);
+            background-size: 1000px 100%;
+        }
+
+        /* Scrollbar personalizada */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0,0,0,0.2);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0,0,0,0.3);
+        }
+
+        /* Responsivo */
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .btn-amazon {
+                padding: 16px 24px;
+            }
+            
+            .page-link {
+                padding: 10px 14px;
+                min-width: 42px;
+            }
+            
+            .footer-links {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-title h1 {
+                font-size: 1.8em;
+            }
+            
+            .produto-imagem {
+                height: 180px;
+            }
+            
+            .preco-principal {
+                font-size: 1.6em;
+            }
+        }
+
+        /* Animações de entrada */
+        @keyframes slideUp {
             from {
                 opacity: 0;
-                transform: translateY(10px);
+                transform: translateY(20px);
             }
             to {
                 opacity: 1;
@@ -379,131 +623,224 @@
             }
         }
 
-        .produto {
-            animation: fadeIn 0.3s ease-out;
+        .produto-card {
+            animation: slideUp 0.4s ease-out forwards;
         }
 
-        @media (max-width: 768px) {
-            .botao-amazon {
-                padding: 16px 20px;
-                font-size: 1em;
-            }
-
-            .pagina-link {
-                padding: 12px 15px;
-            }
-        }
+        .produto-card:nth-child(2) { animation-delay: 0.1s; }
+        .produto-card:nth-child(3) { animation-delay: 0.2s; }
+        .produto-card:nth-child(4) { animation-delay: 0.3s; }
+        .produto-card:nth-child(5) { animation-delay: 0.4s; }
+        .produto-card:nth-child(6) { animation-delay: 0.5s; }
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>
-                <span aria-hidden="true">🛒</span> 
-                Promoções Amazon para Bebês
-            </h1>
-            <p class="subtitle">
-                <span aria-hidden="true">✨</span>
-                As melhores ofertas da Amazon em um só lugar
-            </p>
-            
-            <div class="stats">
-                <div class="stats-info">
-                    <span class="stats-icon" aria-hidden="true">📦</span>
-                    <span><strong>{{ total_produtos }}</strong> produtos encontrados</span>
+        <!-- Header Premium -->
+        <header class="header-premium">
+            <div class="header-content">
+                <div class="header-title">
+                    <h1>baby<span style="color: var(--accent);">deals</span></h1>
+                    <span class="header-badge">
+                        <i class="fas fa-bolt"></i> Ofertas exclusivas
+                    </span>
                 </div>
-                {% if total_paginas > 1 %}
-                <span class="total-produtos" aria-label="Página {{ pagina_atual }} de {{ total_paginas }}">
-                    Página {{ pagina_atual }}/{{ total_paginas }}
-                </span>
-                {% endif %}
+                
+                <div class="header-subtitle">
+                    <i class="fas fa-gem"></i>
+                    <span>As melhores promoções da Amazon para o seu bebê</span>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-box"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>{{ total_produtos }}</h3>
+                            <p>Produtos disponíveis</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-tags"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Até 50%</h3>
+                            <p>De desconto</p>
+                        </div>
+                    </div>
+                    
+                    {% if total_paginas and total_paginas > 1 %}
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-layer-group"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>{{ total_paginas }}</h3>
+                            <p>Páginas</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
             </div>
         </header>
 
+        <!-- Conteúdo Principal -->
         {% if produtos and produtos|length > 0 %}
             <div class="produtos-grid">
                 {% for produto in produtos %}
-                    <article class="produto">
+                    <article class="produto-card">
                         <div class="produto-imagem">
                             <img src="{{ produto[2] }}" 
                                  alt="{{ produto[0] }}" 
                                  loading="lazy"
                                  onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\' viewBox=\'0 0 200 200\'%3E%3Crect width=\'200\' height=\'200\' fill=\'%23f0f0f0\'/%3E%3Ctext x=\'40\' y=\'115\' font-family=\'Arial\' font-size=\'14\' fill=\'%23999\'%3EImagem%3C/text%3E%3Ctext x=\'35\' y=\'135\' font-family=\'Arial\' font-size=\'14\' fill=\'%23999\'%3Eindisponível%3C/text%3E%3C/svg%3E'">
+                            
+                            <!-- Badge Amazon -->
+                            <div class="produto-tag">
+                                <i class="fab fa-amazon"></i>
+                                <span>Amazon</span>
+                            </div>
                         </div>
                         
                         <div class="produto-info">
-                            <span class="badge-amazon">
-                                <span aria-hidden="true">🟡</span> Amazon
-                            </span>
+                            <div class="produto-categoria">
+                                <i class="fas fa-baby"></i>
+                                <span>Bebês</span>
+                            </div>
                             
                             <h3 class="produto-titulo">{{ produto[0] }}</h3>
                             
                             <div class="produto-preco">
                                 {% if produto[1] == "Preço indisponível" or produto[1] == "Ver preço" %}
-                                    <span class="preco-indisponivel">{{ produto[1] }}</span>
+                                    <span class="preco-indisponivel">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        {{ produto[1] }}
+                                    </span>
                                 {% else %}
-                                    <div class="preco-valor">
-                                        <span class="simbolo">R$</span>
-                                        <span>
+                                    <div class="preco-principal">
+                                        <span class="preco-simbolo">R$</span>
+                                        <span class="preco-inteiro">
                                             {% if ',' in produto[1] %}
-                                                {{ produto[1] }}
+                                                {{ produto[1].split(',')[0] }}
                                             {% elif '.' in produto[1] %}
-                                                {{ produto[1]|replace('.', ',') }}
+                                                {{ produto[1].split('.')[0] }}
                                             {% else %}
-                                                {{ produto[1] }},00
+                                                {{ produto[1] }}
+                                            {% endif %}
+                                        </span>
+                                        <span class="preco-centavos">
+                                            {% if ',' in produto[1] %}
+                                                ,{{ produto[1].split(',')[1] }}
+                                            {% elif '.' in produto[1] %}
+                                                ,{{ produto[1].split('.')[1] }}
+                                            {% else %}
+                                                ,00
                                             {% endif %}
                                         </span>
                                     </div>
-                                    <span class="preco-parcelamento">à vista no PIX</span>
+                                    <div class="preco-parcelamento">
+                                        <i class="fas fa-credit-card"></i>
+                                        em até <strong>3x</strong> sem juros
+                                    </div>
                                 {% endif %}
                             </div>
                             
-                            <a href="{{ produto[3] }}" target="_blank" class="botao-amazon" rel="noopener noreferrer">
-                                <span>Ver na Amazon</span>
-                                <span aria-hidden="true">🛒</span>
+                            <a href="{{ produto[3] }}" target="_blank" class="btn-amazon" rel="noopener noreferrer">
+                                <span>Comprar na Amazon</span>
+                                <i class="fas fa-arrow-right"></i>
                             </a>
                         </div>
                     </article>
                 {% endfor %}
             </div>
             
+            <!-- Paginação -->
             {% if total_paginas > 1 %}
             <nav class="paginacao" aria-label="Navegação de páginas">
                 {% if pagina_atual > 1 %}
-                    <a href="?pagina=1" class="pagina-link" aria-label="Primeira página">«</a>
-                    <a href="?pagina={{ pagina_atual - 1 }}" class="pagina-link" aria-label="Página anterior">‹</a>
+                    <a href="?pagina=1" class="page-link" aria-label="Primeira página" title="Primeira página">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+                    <a href="?pagina={{ pagina_atual - 1 }}" class="page-link" aria-label="Página anterior" title="Página anterior">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
                 {% endif %}
                 
                 {% for num in range(1, total_paginas + 1) %}
                     {% if num == pagina_atual %}
-                        <span class="pagina-link ativa" aria-current="page">{{ num }}</span>
+                        <span class="page-link active" aria-current="page">{{ num }}</span>
                     {% elif num >= pagina_atual - 2 and num <= pagina_atual + 2 %}
-                        <a href="?pagina={{ num }}" class="pagina-link" aria-label="Página {{ num }}">{{ num }}</a>
+                        <a href="?pagina={{ num }}" class="page-link" aria-label="Página {{ num }}">{{ num }}</a>
                     {% endif %}
                 {% endfor %}
                 
                 {% if pagina_atual < total_paginas %}
-                    <a href="?pagina={{ pagina_atual + 1 }}" class="pagina-link" aria-label="Próxima página">›</a>
-                    <a href="?pagina={{ total_paginas }}" class="pagina-link" aria-label="Última página">»</a>
+                    <a href="?pagina={{ pagina_atual + 1 }}" class="page-link" aria-label="Próxima página" title="Próxima página">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                    <a href="?pagina={{ total_paginas }}" class="page-link" aria-label="Última página" title="Última página">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
                 {% endif %}
             </nav>
             {% endif %}
             
         {% else %}
-            <div class="sem-produtos">
-                <h2>😕 Nenhum produto encontrado</h2>
-                <p>Os produtos aparecerão aqui após a execução do crawler!</p>
-                <a href="/debug" class="botao-amazon">
-                    <span>Ver diagnóstico</span>
-                    <span aria-hidden="true">🔧</span>
+            <!-- Empty State -->
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="fas fa-box-open"></i>
+                </div>
+                <h2>Nenhum produto encontrado</h2>
+                <p>Estamos buscando as melhores ofertas para você!</p>
+                <a href="/debug" class="btn-amazon">
+                    <i class="fas fa-sync-alt"></i>
+                    <span>Atualizar</span>
                 </a>
             </div>
         {% endif %}
         
-        <footer>
-            <p>Link de afiliado: <strong>lordumungus-20</strong> (Amazon)</p>
-            <p>© 2024 - Promoções Amazon para Bebês</p>
-            <p style="font-size: 0.8em; opacity: 0.7;">Preços e estoque sujeitos a alteração</p>
+        <!-- Footer Premium -->
+        <footer class="footer-premium">
+            <div class="footer-content">
+                <div class="footer-links">
+                    <a href="#">
+                        <i class="fas fa-info-circle"></i>
+                        Sobre
+                    </a>
+                    <a href="#">
+                        <i class="fas fa-envelope"></i>
+                        Contato
+                    </a>
+                    <a href="/debug">
+                        <i class="fas fa-chart-line"></i>
+                        Status
+                    </a>
+                    <a href="#" target="_blank">
+                        <i class="fab fa-instagram"></i>
+                        Instagram
+                    </a>
+                </div>
+                
+                <div class="footer-copyright">
+                    <p>
+                        <i class="fas fa-heart" style="color: #ff6b6b;"></i>
+                        Links de afiliado: <strong>lordumungus-20</strong> (Amazon)
+                    </p>
+                    <p style="margin-top: 8px;">
+                        © 2024 BabyDeals - Todos os direitos reservados
+                    </p>
+                </div>
+                
+                <div class="footer-badge">
+                    <i class="fas fa-shield-alt"></i>
+                    Preços atualizados em tempo real
+                </div>
+            </div>
         </footer>
     </div>
 </body>
