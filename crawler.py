@@ -3,21 +3,25 @@ import time
 import sqlite3
 import re
 import random
+from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 
-# Tag de afiliado Amazon
+# Configurações
 PARTNER_TAG_AMAZON = "lordumungus-20"
-
-# Palavras-chave para busca (foco em bebês)
 KEYWORDS = ["bebe", "bebê", "fraldas", "mamadeira", "carrinho de bebe", "brinquedos bebe"]
-
-# Banco local
+LIMITE_PRODUTOS = 100  # ← ALTERADO PARA 100
 DB_PATH = 'produtos.db'
-print(f"📁 CRAWLER: Salvando banco em: {DB_PATH}")
+
+print("=" * 60)
+print(f"🚀 CRAWLER AMAZON - {datetime.now().strftime('%d/%m/%Y %H:%M')}")
+print("=" * 60)
+print(f"🎯 Limite: {LIMITE_PRODUTOS} produtos")
+print(f"📦 Banco: {DB_PATH}")
+print()
 
 def configurar_driver():
     """Configura o Chrome em modo stealth"""
@@ -39,7 +43,6 @@ def configurar_driver():
     driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
     return driver
 
-# ==================== AMAZON ====================
 def extrair_nome_amazon(produto):
     """Extrai nome do produto na Amazon"""
     selectores = [
@@ -124,7 +127,7 @@ def extrair_link_amazon(produto):
             continue
     return None
 
-def buscar_amazon(driver, keyword):
+def buscar_amazon(driver, keyword, produtos_coletados):
     """Busca produtos na Amazon para uma palavra-chave"""
     print(f"\n🟡 AMAZON - Buscando: {keyword}")
     
@@ -137,16 +140,23 @@ def buscar_amazon(driver, keyword):
     driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
     time.sleep(2)
     
+    # Encontra produtos
     produtos = driver.find_elements(By.CSS_SELECTOR, "[data-component-type='s-search-result']")
     if not produtos:
         produtos = driver.find_elements(By.CSS_SELECTOR, ".s-result-item")
     
-    print(f"  📦 Encontrados {len(produtos)} produtos na Amazon")
+    print(f"  📦 Encontrados {len(produtos)} produtos disponíveis")
     
     resultados = []
     contador = 0
     
-    for produto in produtos[:12]:
+    # Calcula quantos ainda podemos pegar
+    restantes = LIMITE_PRODUTOS - produtos_coletados
+    max_por_busca = min(12, restantes)  # Pega no máximo 12 por busca
+    
+    print(f"  🎯 Vamos pegar até {max_por_busca} produtos")
+    
+    for produto in produtos[:max_por_busca]:
         try:
             nome = extrair_nome_amazon(produto)
             if not nome:
@@ -159,7 +169,6 @@ def buscar_amazon(driver, keyword):
             if not link:
                 continue
             
-            # SEM a coluna loja - apenas 4 campos
             resultados.append((nome, preco, imagem, link))
             contador += 1
             print(f"  ✓ {contador:2d}: {nome[:40]}... - R$ {preco}")
@@ -172,7 +181,7 @@ def buscar_amazon(driver, keyword):
     return resultados
 
 def criar_tabela():
-    """Cria a tabela SEM a coluna loja"""
+    """Cria a tabela no banco de dados"""
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     
@@ -189,7 +198,7 @@ def criar_tabela():
     
     conn.commit()
     conn.close()
-    print("✅ Tabela 'produtos' criada/verificada (sem coluna loja)")
+    print("✅ Tabela 'produtos' verificada/criada")
 
 def contar_produtos():
     """Conta quantos produtos existem no banco"""
@@ -203,87 +212,103 @@ def contar_produtos():
     except:
         return 0
 
-def atualizar_banco(resultados):
-    """Salva os resultados no banco de dados"""
+def limpar_banco():
+    """Apaga todos os registros anteriores"""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM produtos")
+    conn.commit()
+    conn.close()
+    print("🗑️ Registros anteriores apagados")
+
+def salvar_produtos(resultados):
+    """Salva os produtos no banco"""
     if not resultados:
         print("❌ Nenhum resultado para salvar!")
-        return
+        return False
     
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     
-    # Conta antes de limpar
-    antes = contar_produtos()
-    
-    # Limpa produtos antigos
-    cursor.execute("DELETE FROM produtos")
-    
-    # Insere os novos produtos (apenas 4 campos)
+    # Insere os produtos
     for i, produto in enumerate(resultados, 1):
         cursor.execute("""
         INSERT INTO produtos (nome, preco, imagem, link)
         VALUES (?, ?, ?, ?)
         """, produto)
-        if i % 10 == 0:
+        if i % 20 == 0:
             print(f"  💾 Salvando... {i} produtos")
     
     conn.commit()
-    
-    # Verifica quantos produtos foram salvos
-    depois = contar_produtos()
     conn.close()
-    
-    print(f"\n✅ {depois} produtos salvos com sucesso!")
-    print(f"   (Antes: {antes} produtos)")
+    return True
 
-# ==================== MAIN ====================
 def main():
-    print("=" * 60)
-    print("🚀 CRAWLER AMAZON - PROMOÇÕES PARA BEBÊS")
-    print("=" * 60)
-    print(f"🎯 Tag de afiliado: {PARTNER_TAG_AMAZON}")
-    print(f"📦 Palavras-chave: {', '.join(KEYWORDS)}")
-    print()
+    inicio = time.time()
     
-    # Remove banco antigo se existir (para garantir estrutura correta)
-    if os.path.exists(DB_PATH):
-        print("🗑️ Removendo banco antigo...")
-        os.remove(DB_PATH)
-    
-    # Cria nova tabela
+    # Cria a tabela se não existir
     criar_tabela()
+    
+    # Mostra quantos produtos existem antes
+    antes = contar_produtos()
+    print(f"📊 Produtos no banco antes: {antes}")
+    
+    # Pergunta se quer apagar (modo automático sempre apaga)
+    if antes > 0:
+        print("🗑️ Apagando registros anteriores...")
+        limpar_banco()
     
     driver = configurar_driver()
     todos_produtos = []
     
     try:
         for keyword in KEYWORDS:
+            # Verifica se já atingiu o limite
+            if len(todos_produtos) >= LIMITE_PRODUTOS:
+                print(f"\n🛑 Limite de {LIMITE_PRODUTOS} produtos atingido!")
+                break
+            
             print(f"\n{'='*60}")
             print(f"🔎 PALAVRA-CHAVE: {keyword.upper()}")
             print(f"{'='*60}")
             
-            produtos_amazon = buscar_amazon(driver, keyword)
-            todos_produtos.extend(produtos_amazon)
+            # Busca produtos
+            produtos = buscar_amazon(driver, keyword, len(todos_produtos))
+            todos_produtos.extend(produtos)
             
-            print(f"\n📊 Parcial: {len(todos_produtos)} produtos")
+            print(f"\n📊 Parcial: {len(todos_produtos)}/{LIMITE_PRODUTOS} produtos")
             
-            if len(todos_produtos) >= 48:
-                print("\n🛑 Atingido limite de 48 produtos")
-                break
-            
-            time.sleep(random.uniform(3, 5))
+            # Pausa entre buscas
+            if len(todos_produtos) < LIMITE_PRODUTOS:
+                time.sleep(random.uniform(3, 5))
         
         print(f"\n{'='*60}")
         print(f"📊 RESUMO FINAL")
         print(f"{'='*60}")
-        print(f"Total: {len(todos_produtos)} produtos da Amazon")
+        print(f"✅ Total coletado: {len(todos_produtos)} produtos")
         
         if len(todos_produtos) == 0:
             print("\n❌ Nenhum produto encontrado!")
             driver.quit()
             return
         
-        atualizar_banco(todos_produtos)
+        # Salva no banco
+        if salvar_produtos(todos_produtos):
+            depois = contar_produtos()
+            print(f"\n✅ {depois} produtos salvos com sucesso!")
+            
+            # Estatísticas de preço
+            conn = sqlite3.connect(DB_PATH)
+            cursor = conn.cursor()
+            cursor.execute("SELECT COUNT(*) FROM produtos WHERE preço = 'Preço indisponível'")
+            sem_preco = cursor.fetchone()[0]
+            conn.close()
+            
+            if sem_preco > 0:
+                print(f"⚠️ {sem_preco} produtos sem preço disponível")
+        
+        tempo_total = time.time() - inicio
+        print(f"⏱️ Tempo total: {tempo_total:.2f} segundos")
         
     except Exception as e:
         print(f"\n❌ Erro durante execução: {e}")

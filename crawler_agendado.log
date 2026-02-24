@@ -1,0 +1,72 @@
+2026-02-24 20:44:52,942 - INFO - 🕐 AGENDADOR INICIADO - Executando a cada 30 minutos
+2026-02-24 20:44:52,942 - INFO - 
+============================================================
+2026-02-24 20:44:52,943 - INFO - 📊 STATUS DO SISTEMA
+2026-02-24 20:44:52,943 - INFO - ============================================================
+2026-02-24 20:44:52,947 - INFO - 📦 Banco: 48 produtos | 28.00 KB
+2026-02-24 20:44:52,948 - INFO - 🕐 Última atualização: 24/02/2026 20:21:03
+2026-02-24 20:44:52,948 - INFO - 📋 Log: 0.48 KB | 24/02/2026 20:44:52
+2026-02-24 20:44:52,948 - INFO - ============================================================
+2026-02-24 20:44:52,948 - INFO - 
+🚀 Executando primeira coleta...
+2026-02-24 20:44:52,949 - INFO - ============================================================
+2026-02-24 20:44:52,949 - INFO - 🚀 INICIANDO CICLO COMPLETO - 24/02/2026 20:44:52
+2026-02-24 20:44:52,949 - INFO - ============================================================
+2026-02-24 20:44:52,949 - INFO - 🔍 Verificando ambiente...
+2026-02-24 20:44:52,949 - INFO - 🐍 Python: 3.12.3
+2026-02-24 20:44:52,951 - WARNING - ⚠️ Railway CLI não encontrado. Deploy automático desabilitado.
+2026-02-24 20:44:52,951 - ERROR - ❌ Ambiente não configurado corretamente
+2026-02-24 20:44:52,952 - INFO - 
+⏰ Próximas execuções:
+2026-02-24 20:45:22,839 - INFO - 🕐 AGENDADOR INICIADO - Executando a cada 30 minutos
+2026-02-24 20:45:22,839 - INFO - 
+============================================================
+2026-02-24 20:45:22,839 - INFO - 📊 STATUS DO SISTEMA
+2026-02-24 20:45:22,839 - INFO - ============================================================
+2026-02-24 20:45:22,843 - INFO - 📦 Banco: 48 produtos | 28.00 KB
+2026-02-24 20:45:22,843 - INFO - 🕐 Última atualização: 24/02/2026 20:21:03
+2026-02-24 20:45:22,843 - INFO - 📋 Log: 1.81 KB | 24/02/2026 20:45:22
+2026-02-24 20:45:22,843 - INFO - ============================================================
+2026-02-24 20:45:22,844 - INFO - 
+🚀 Executando primeira coleta...
+2026-02-24 20:45:22,844 - INFO - ============================================================
+2026-02-24 20:45:22,844 - INFO - 🚀 INICIANDO CICLO COMPLETO - 24/02/2026 20:45:22
+2026-02-24 20:45:22,844 - INFO - ============================================================
+2026-02-24 20:45:22,844 - INFO - 🔍 Verificando ambiente...
+2026-02-24 20:45:22,844 - INFO - 🐍 Python: 3.12.3
+2026-02-24 20:45:22,846 - WARNING - ⚠️ Railway CLI não encontrado. Deploy automático desabilitado.
+2026-02-24 20:45:22,846 - ERROR - ❌ Ambiente não configurado corretamente
+2026-02-24 20:45:22,847 - INFO - 
+⏰ Próximas execuções:
+2026-02-24 20:47:16,248 - INFO - 🕐 AGENDADOR INICIADO - Executando a cada 30 minutos
+2026-02-24 20:47:16,248 - INFO - ============================================================
+2026-02-24 20:47:16,248 - INFO - 
+============================================================
+2026-02-24 20:47:16,248 - INFO - 📊 STATUS DO SISTEMA
+2026-02-24 20:47:16,248 - INFO - ============================================================
+2026-02-24 20:47:16,252 - INFO - 📦 Banco: 48 produtos | 28.00 KB
+2026-02-24 20:47:16,252 - INFO - 🕐 Última atualização: 24/02/2026 20:21:03
+2026-02-24 20:47:16,252 - INFO - 📋 Log: 3.24 KB | 24/02/2026 20:47:16
+2026-02-24 20:47:16,253 - INFO - ============================================================
+2026-02-24 20:47:16,253 - INFO - 
+🚀 Executando primeira coleta...
+2026-02-24 20:47:16,253 - INFO - ============================================================
+2026-02-24 20:47:16,253 - INFO - 🚀 INICIANDO CICLO COMPLETO - 24/02/2026 20:47:16
+2026-02-24 20:47:16,253 - INFO - ============================================================
+2026-02-24 20:47:16,253 - INFO - 🔍 Verificando ambiente...
+2026-02-24 20:47:16,253 - INFO - 🐍 Python: 3.12.3
+2026-02-24 20:47:16,255 - WARNING - ⚠️ Railway CLI não encontrado. Deploy automático desabilitado.
+2026-02-24 20:47:16,255 - INFO - 📌 Executando crawler
+2026-02-24 20:47:16,965 - ERROR - ❌ Executando crawler falhou!
+2026-02-24 20:47:16,965 - ERROR - Erro: Traceback (most recent call last):
+  File "C:\Users\User\Desktop\teste amazon api\crawler.py", line 20, in <module>
+    print(f"\U0001f680 CRAWLER AMAZON - {datetime.now().strftime('%d/%m/%Y %H:%M')}")
+  File "C:\Python312\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\U0001f680' in position 0: character maps to <undefined>
+
+2026-02-24 20:47:16,965 - ERROR - ❌ Crawler falhou, abortando ciclo
+2026-02-24 20:47:16,965 - INFO - 
+⏰ Agendador configurado - Próxima execução em 30 minutos
+2026-02-24 20:47:16,966 - INFO - ============================================================
