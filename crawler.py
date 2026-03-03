@@ -8,18 +8,31 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
-# Configurações
+# ===== CONFIGURACOES =====
 PARTNER_TAG_AMAZON = "lordumungus-20"
-KEYWORDS = ["bebe", "bebê", "fraldas", "mamadeira", "carrinho de bebe", "brinquedos bebe","bebe conforto", "bebê conforto"]
-LIMITE_PRODUTOS = 300  # ← ALTERADO PARA 100
+LIMITE_PRODUTOS = 300
+KEYWORDS = ["bebe", "bebê", "fraldas", "mamadeira", "carrinho de bebe", 
+            "brinquedos bebe", "bebe conforto", "bebê conforto", 
+            "berço", "cadeira de alimentação", "babá eletrônica", 
+            "mordedor", "chupeta", "bolsa maternidade", "enxoval bebe",
+            "tapete atividades", "canguru", "slip", "trocador", 
+            "aquecedor de mamadeira"]
+# =========================
+
 DB_PATH = 'produtos.db'
+MAX_POR_BUSCA = 30
+PAGINAS_POR_KEYWORD = 3
 
 print("=" * 60)
 print(f"🚀 CRAWLER AMAZON - {datetime.now().strftime('%d/%m/%Y %H:%M')}")
 print("=" * 60)
 print(f"🎯 Limite: {LIMITE_PRODUTOS} produtos")
+print(f"🔑 Palavras-chave: {len(KEYWORDS)}")
+print(f"📄 Páginas por busca: {PAGINAS_POR_KEYWORD}")
 print(f"📦 Banco: {DB_PATH}")
 print()
 
@@ -64,8 +77,8 @@ def extrair_nome_amazon(produto):
     return None
 
 def extrair_preco_amazon(produto):
-    """Extrai preço do produto na Amazon"""
-    # Tenta preço inteiro + centavos
+    """Extrai preco do produto na Amazon"""
+    # Tenta preco inteiro + centavos
     try:
         preco_inteiro = produto.find_element(By.CSS_SELECTOR, ".a-price-whole").text
         preco_centavos = produto.find_element(By.CSS_SELECTOR, ".a-price-fraction").text
@@ -76,7 +89,7 @@ def extrair_preco_amazon(produto):
     except:
         pass
     
-    # Tenta preço completo
+    # Tenta preco completo
     selectores_preco = [
         ".a-price .a-offscreen",
         ".a-price-whole",
@@ -94,7 +107,7 @@ def extrair_preco_amazon(produto):
         except:
             continue
     
-    return "Preço indisponível"
+    return "Preco indisponivel"
 
 def extrair_imagem_amazon(produto):
     """Extrai URL da imagem na Amazon"""
@@ -128,56 +141,81 @@ def extrair_link_amazon(produto):
     return None
 
 def buscar_amazon(driver, keyword, produtos_coletados):
-    """Busca produtos na Amazon para uma palavra-chave"""
+    """Busca produtos na Amazon para uma palavra-chave (MULTIPAGINAS)"""
     print(f"\n🟡 AMAZON - Buscando: {keyword}")
     
-    time.sleep(random.uniform(2, 4))
-    
-    url = f"https://www.amazon.com.br/s?k={keyword}"
-    driver.get(url)
-    
-    time.sleep(3)
-    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-    time.sleep(2)
-    
-    # Encontra produtos
-    produtos = driver.find_elements(By.CSS_SELECTOR, "[data-component-type='s-search-result']")
-    if not produtos:
-        produtos = driver.find_elements(By.CSS_SELECTOR, ".s-result-item")
-    
-    print(f"  📦 Encontrados {len(produtos)} produtos disponíveis")
-    
     resultados = []
-    contador = 0
     
-    # Calcula quantos ainda podemos pegar
-    restantes = LIMITE_PRODUTOS - produtos_coletados
-    max_por_busca = min(12, restantes)  # Pega no máximo 12 por busca
-    
-    print(f"  🎯 Vamos pegar até {max_por_busca} produtos")
-    
-    for produto in produtos[:max_por_busca]:
-        try:
-            nome = extrair_nome_amazon(produto)
-            if not nome:
-                continue
-            
-            preco = extrair_preco_amazon(produto)
-            imagem = extrair_imagem_amazon(produto)
-            link = extrair_link_amazon(produto)
-            
-            if not link:
-                continue
-            
-            resultados.append((nome, preco, imagem, link))
-            contador += 1
-            print(f"  ✓ {contador:2d}: {nome[:40]}... - R$ {preco}")
-            
-        except Exception as e:
-            continue
+    # Loop por multiplas paginas
+    for pagina in range(1, PAGINAS_POR_KEYWORD + 1):
+        # Verifica se ja atingiu o limite global
+        if produtos_coletados + len(resultados) >= LIMITE_PRODUTOS:
+            restantes = LIMITE_PRODUTOS - (produtos_coletados + len(resultados))
+            if restantes <= 0:
+                break
+            print(f"  ⚠️ Ultima pagina: so precisamos de mais {restantes}")
         
-        time.sleep(0.3)
+        print(f"  📄 Pagina {pagina}/{PAGINAS_POR_KEYWORD}")
+        
+        time.sleep(random.uniform(3, 5))
+        
+        # Monta URL com paginacao
+        if pagina == 1:
+            url = f"https://www.amazon.com.br/s?k={keyword}"
+        else:
+            url = f"https://www.amazon.com.br/s?k={keyword}&page={pagina}"
+        
+        driver.get(url)
+        
+        # Aguarda carregar
+        time.sleep(4)
+        
+        # Rola a pagina para carregar tudo
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(2)
+        
+        # Encontra produtos
+        produtos = driver.find_elements(By.CSS_SELECTOR, "[data-component-type='s-search-result']")
+        if not produtos:
+            produtos = driver.find_elements(By.CSS_SELECTOR, ".s-result-item")
+        
+        print(f"  📦 Encontrados {len(produtos)} produtos nesta pagina")
+        
+        # Calcula quantos pegar nesta pagina
+        restantes_global = LIMITE_PRODUTOS - (produtos_coletados + len(resultados))
+        max_nesta_pagina = min(MAX_POR_BUSCA, restantes_global, len(produtos))
+        
+        contador_pagina = 0
+        for produto in produtos[:max_nesta_pagina]:
+            try:
+                nome = extrair_nome_amazon(produto)
+                if not nome:
+                    continue
+                
+                preco = extrair_preco_amazon(produto)
+                imagem = extrair_imagem_amazon(produto)
+                link = extrair_link_amazon(produto)
+                
+                if not link:
+                    continue
+                
+                resultados.append((nome, preco, imagem, link))
+                contador_pagina += 1
+                print(f"    ✓ {contador_pagina:2d}: {nome[:40]}... - R$ {preco}")
+                
+            except Exception as e:
+                continue
+        
+        # Se nao encontrou produtos nesta pagina, para
+        if contador_pagina == 0:
+            print("  ⚠️ Sem produtos nesta pagina, encerrando busca")
+            break
+        
+        # Pequena pausa entre paginas
+        if pagina < PAGINAS_POR_KEYWORD:
+            time.sleep(random.uniform(2, 4))
     
+    print(f"  ✅ Total para '{keyword}': {len(resultados)} produtos")
     return resultados
 
 def criar_tabela():
@@ -236,24 +274,43 @@ def salvar_produtos(resultados):
         INSERT INTO produtos (nome, preco, imagem, link)
         VALUES (?, ?, ?, ?)
         """, produto)
-        if i % 20 == 0:
-            print(f"  💾 Salvando... {i} produtos")
+        if i % 50 == 0:
+            print(f"  💾 Salvando... {i}/{len(resultados)} produtos")
     
     conn.commit()
     conn.close()
     return True
 
+def mostrar_estatisticas():
+    """Mostra estatisticas do banco"""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT COUNT(*) FROM produtos")
+    total = cursor.fetchone()[0]
+    
+    cursor.execute("SELECT COUNT(*) FROM produtos WHERE preco != 'Preco indisponivel'")
+    com_preco = cursor.fetchone()[0]
+    
+    conn.close()
+    
+    print(f"\n📊 ESTATISTICAS FINAIS")
+    print(f"  Total produtos: {total}")
+    if total > 0:
+        print(f"  Com preco: {com_preco} ({com_preco/total*100:.1f}%)")
+        print(f"  Sem preco: {total - com_preco}")
+
 def main():
     inicio = time.time()
     
-    # Cria a tabela se não existir
+    # Cria a tabela se nao existir
     criar_tabela()
     
     # Mostra quantos produtos existem antes
     antes = contar_produtos()
     print(f"📊 Produtos no banco antes: {antes}")
     
-    # Pergunta se quer apagar (modo automático sempre apaga)
+    # Apaga registros anteriores
     if antes > 0:
         print("🗑️ Apagando registros anteriores...")
         limpar_banco()
@@ -262,14 +319,14 @@ def main():
     todos_produtos = []
     
     try:
-        for keyword in KEYWORDS:
-            # Verifica se já atingiu o limite
+        for i, keyword in enumerate(KEYWORDS, 1):
+            # Verifica se ja atingiu o limite
             if len(todos_produtos) >= LIMITE_PRODUTOS:
                 print(f"\n🛑 Limite de {LIMITE_PRODUTOS} produtos atingido!")
                 break
             
             print(f"\n{'='*60}")
-            print(f"🔎 PALAVRA-CHAVE: {keyword.upper()}")
+            print(f"🔎 PALAVRA-CHAVE {i}/{len(KEYWORDS)}: {keyword.upper()}")
             print(f"{'='*60}")
             
             # Busca produtos
@@ -279,8 +336,10 @@ def main():
             print(f"\n📊 Parcial: {len(todos_produtos)}/{LIMITE_PRODUTOS} produtos")
             
             # Pausa entre buscas
-            if len(todos_produtos) < LIMITE_PRODUTOS:
-                time.sleep(random.uniform(3, 5))
+            if len(todos_produtos) < LIMITE_PRODUTOS and i < len(KEYWORDS):
+                pausa = random.uniform(5, 8)
+                print(f"⏸️  Pausa de {pausa:.1f} segundos antes da proxima busca...")
+                time.sleep(pausa)
         
         print(f"\n{'='*60}")
         print(f"📊 RESUMO FINAL")
@@ -297,21 +356,16 @@ def main():
             depois = contar_produtos()
             print(f"\n✅ {depois} produtos salvos com sucesso!")
             
-            # Estatísticas de preço
-            conn = sqlite3.connect(DB_PATH)
-            cursor = conn.cursor()
-            cursor.execute("SELECT COUNT(*) FROM produtos WHERE preço = 'Preço indisponível'")
-            sem_preco = cursor.fetchone()[0]
-            conn.close()
-            
-            if sem_preco > 0:
-                print(f"⚠️ {sem_preco} produtos sem preço disponível")
+            # Estatisticas
+            mostrar_estatisticas()
         
         tempo_total = time.time() - inicio
-        print(f"⏱️ Tempo total: {tempo_total:.2f} segundos")
+        print(f"\n⏱️ Tempo total: {tempo_total:.2f} segundos")
+        if len(todos_produtos) > 0:
+            print(f"⏱️ Media: {tempo_total/len(todos_produtos):.2f} segundos/produto")
         
     except Exception as e:
-        print(f"\n❌ Erro durante execução: {e}")
+        print(f"\n❌ Erro durante execucao: {e}")
     finally:
         driver.quit()
         print("\n👋 Crawler encerrado")
