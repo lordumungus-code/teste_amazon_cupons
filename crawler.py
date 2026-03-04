@@ -15,16 +15,31 @@ from webdriver_manager.chrome import ChromeDriverManager
 # ===== CONFIGURACOES =====
 PARTNER_TAG_AMAZON = "lordumungus-20"
 LIMITE_PRODUTOS = 300
-KEYWORDS = ["bebe", "bebê", "fraldas", "mamadeira", "carrinho de bebe", 
-            "brinquedos bebe", "bebe conforto", "bebê conforto", 
-            "berço", "cadeira de alimentação", "babá eletrônica", 
-            "mordedor", "chupeta", "bolsa maternidade", "enxoval bebe",
-            "tapete atividades", "canguru", "slip", "trocador", 
-            "aquecedor de mamadeira"]
+KEYWORDS = [
+    "fraldas",
+    "lenço umedecido",
+    "pomada assadura",
+    "mamadeira",
+    "chupeta",
+    "berço",
+    "colchão berço",
+    "bebê conforto",
+    "carrinho de bebe",
+    "bolsa maternidade",
+    "trocador",
+    "banheira bebe",
+    "toalha com capuz bebe",
+    "body bebe",
+    "mijão bebe",
+    "macacão bebe",
+    "kit higiene bebe",
+    "termometro digital bebe",
+    "paninho de boca"
+]
 # =========================
 
 DB_PATH = 'produtos.db'
-MAX_POR_BUSCA = 30
+MAX_POR_BUSCA = 15
 PAGINAS_POR_KEYWORD = 3
 
 print("=" * 60)
